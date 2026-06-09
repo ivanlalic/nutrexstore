@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis de Negocio — Suplementos en MercadoLibre Argentina</title>
+<style>
+:root{--bg:#F5F4F0;--card:#fff;--text:#1C1C1E;--muted:#636366;--border:#E0DED8;--green:#1B8A5A;--green-bg:#EAF5EE;--red:#C93535;--red-bg:#FDECEC;--amber:#B86800;--amber-bg:#FDF3E0;--blue:#1A5FAD;--blue-bg:#E8F0FC;--dark:#1C2B3A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.5}
+.header{background:var(--dark);color:#fff;padding:28px max(24px,5%)}
+.header-inner{max-width:1040px;margin:0 auto;position:relative}
+.header-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px}
+.header h1{font-size:24px;font-weight:700;margin-bottom:5px;line-height:1.2}
+.header-sub{font-size:13px;color:rgba(255,255,255,.55)}
+.header-actions{position:absolute;top:0;right:0}
+.btn-print{padding:7px 14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-print:hover{background:rgba(255,255,255,.2)}
+
+.kpis{background:#fff;border-bottom:1px solid var(--border)}
+.kpis-inner{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.kpi{padding:18px 20px;border-right:1px solid var(--border)}
+.kpi:last-child{border-right:none}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--dark);line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi.hl .kpi-val{color:var(--green)}
+
+.main{max-width:1040px;margin:0 auto;padding:28px max(24px,5%) 60px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto}
+.tab-btn{padding:9px 18px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:inherit}
+.tab-btn.active{color:var(--dark);border-bottom-color:var(--dark)}
+.pane{display:none}.pane.active{display:block}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.section-h{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+
+/* Inputs panel */
+.inputs{background:#fff;border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:20px}
+.inputs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 24px}
+@media(max-width:780px){.inputs-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.inputs-grid{grid-template-columns:1fr}}
+.ig-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sl-group{margin-bottom:12px}
+.sl-row{display:flex;justify-content:space-between;margin-bottom:3px}
+.sl-label{font-size:12px;color:var(--muted)}
+.sl-val{font-size:12px;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--dark);margin:0}
+.tog{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.tog-btn{flex:1;padding:6px;font-size:12px;background:#fff;border:none;cursor:pointer;color:var(--muted);font-family:inherit}
+.tog-btn.active{background:var(--dark);color:#fff;font-weight:500}
+.num-in{width:80px;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);background:var(--card);text-align:right;-moz-appearance:textfield}
+.num-in::-webkit-outer-spin-button,.num-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num-in:focus{outline:none;border-color:var(--blue)}
+
+/* Comparison cards */
+.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:840px){.compare{grid-template-columns:1fr}}
+.scn{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.scn.rec{border:2px solid var(--green)}
+.scn-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+.scn.rec .scn-head{background:var(--green-bg)}
+.scn-name{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px}
+.scn-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.badge-r{background:var(--red-bg);color:var(--red)}
+.badge-a{background:var(--amber-bg);color:var(--amber)}
+.badge-g{background:var(--green);color:#fff}
+.scn-hero{padding:16px;text-align:center;border-bottom:1px solid var(--border)}
+.scn-hero-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.scn-hero-val{font-size:26px;font-weight:700;color:var(--dark);line-height:1}
+.scn.rec .scn-hero-val{color:var(--green)}
+.scn-hero-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.scn-body{padding:14px 16px;flex:1}
+.scn-line{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+.scn-line .l{color:var(--muted)}
+.scn-line .v{color:var(--text);font-weight:500;text-align:right}
+.scn-line.neg .v{color:var(--muted)}
+.scn-line.tot{border-top:1px solid var(--border);margin-top:5px;padding-top:7px;font-weight:600}
+.scn-line.tot .l,.scn-line.tot .v{color:var(--text);font-weight:600}
+.scn-line.iva .v,.scn-line.iva .l{color:var(--red)}
+.scn-foot{padding:12px 16px;border-top:1px solid var(--border)}
+.scn-note{font-size:11px;line-height:1.5;border-radius:5px;padding:8px 10px}
+.note-r{background:var(--red-bg);color:#8a2020}
+.note-a{background:var(--amber-bg);color:#7a4500}
+.note-g{background:var(--green-bg);color:#0f5c3c}
+.scn-extra{font-size:11px;color:var(--blue);background:var(--blue-bg);border-radius:5px;padding:8px 10px;margin-top:8px;line-height:1.5}
+
+/* Warn boxes */
+.warn-box{border-radius:6px;padding:12px 14px;margin-bottom:12px}
+.warn-box.amber{background:var(--amber-bg);border-left:3px solid var(--amber)}
+.warn-box.red{background:var(--red-bg);border-left:3px solid var(--red)}
+.warn-box.green{background:var(--green-bg);border-left:3px solid var(--green)}
+.warn-box.blue{background:var(--blue-bg);border-left:3px solid var(--blue)}
+.warn-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.warn-box.amber .warn-title{color:var(--amber)}.warn-box.red .warn-title{color:var(--red)}
+.warn-box.green .warn-title{color:var(--green)}.warn-box.blue .warn-title{color:var(--blue)}
+.warn-box p{font-size:12px;color:var(--muted);line-height:1.6;margin-top:3px}
+
+/* Tables */
+.comp-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}
+.comp-table th{background:var(--dark);color:#fff;padding:9px 12px;font-size:11px;font-weight:600;text-align:left}
+.comp-table th:not(:first-child){text-align:center}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.comp-table td:not(:first-child){text-align:center}
+.comp-table tr:nth-child(even) td{background:#fafaf8}
+.comp-table .ok{color:var(--green);font-weight:600}.comp-table .no{color:var(--red)}.comp-table .med{color:var(--amber);font-weight:500}
+.comp-table .rec td{background:var(--green-bg)!important;border-left:3px solid var(--green)}
+.unit-table{width:100%;border-collapse:collapse}
+.unit-table td{padding:7px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+.unit-table tr:last-child td{border-bottom:none;font-weight:600;background:#fafaf8}
+.unit-table .val{text-align:right;color:var(--muted)}
+.unit-table .name{color:var(--text)}
+.unit-table .iva .name,.unit-table .iva .val{color:var(--red)}
+.unit-table .profit .val{color:var(--green);font-weight:700}.unit-table .profit .name{font-weight:600}
+
+.retiro-card{border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+.retiro-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.retiro-title{font-size:14px;font-weight:600}
+.retiro-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.badge.g{background:var(--green-bg);color:var(--green)}.badge.r{background:var(--red-bg);color:var(--red)}
+.badge.b{background:var(--blue-bg);color:var(--blue)}.badge.a{background:var(--amber-bg);color:var(--amber)}
+.steps{list-style:none;margin-top:8px}
+.steps li{display:flex;gap:8px;margin-bottom:6px}
+.step-n{width:20px;height:20px;background:var(--dark);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-t{font-size:12px;color:var(--muted);line-height:1.5}
+.step-t strong{color:var(--text)}
+
+.oblig-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:12px 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.oblig-row{display:grid;grid-template-columns:160px 90px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:start}
+.oblig-row:last-child{border-bottom:none}
+.oblig-name{font-size:13px;font-weight:500}
+.oblig-period{font-size:11px;background:#eeecea;padding:2px 7px;border-radius:3px;color:var(--muted);font-weight:500;display:inline-block}
+.oblig-desc{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:500px){.oblig-row{grid-template-columns:1fr 1fr}.oblig-desc{grid-column:1/-1}}
+
+.footer{background:#1C1C1E;color:rgba(255,255,255,.4);text-align:center;padding:20px 24px;font-size:11px;line-height:1.7}
+.footer strong{color:rgba(255,255,255,.7)}
+#srl-extra{display:none}
+@media(max-width:500px){.kpis-inner{grid-template-columns:1fr 1fr}.header-actions{position:static;margin-top:12px}}
+@media print{.header-actions,.tabs{display:none}.pane{display:block!important}input[type=range]{display:none}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-actions"><button class="btn-print" onclick="window.print()">&#128438; Imprimir / PDF</button></div>
+    <div class="header-eyebrow">Análisis de Viabilidad · Confidencial</div>
+    <h1>Venta de Suplementos en MercadoLibre Argentina</h1>
+    <div class="header-sub">Comparación de 3 estructuras · Proyecciones mensuales · <span id="hoy"></span></div>
+  </div>
+</header>
+
+<div class="kpis">
+  <div class="kpis-inner">
+    <div class="kpi"><div class="kpi-label">Facturación mensual</div><div class="kpi-val" id="h-rev">—</div><div class="kpi-sub" id="h-units">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ganancia del negocio (RI)</div><div class="kpi-val" id="h-net">—</div><div class="kpi-sub">antes de Ganancias personal</div></div>
+    <div class="kpi hl"><div class="kpi-label">Por socio / mes (SRL)</div><div class="kpi-val" id="h-pocket">—</div><div class="kpi-sub">honorarios netos en mano</div></div>
+    <div class="kpi"><div class="kpi-label">Primer día real</div><div class="kpi-val">$2.5M</div><div class="kpi-sub">39 unidades · Ensure 800g</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="tab('cmp',0)">Comparador</button>
+  <button class="tab-btn" onclick="tab('imp',1)">Impuestos</button>
+  <button class="tab-btn" onclick="tab('ret',2)">Retirar Utilidades</button>
+  <button class="tab-btn" onclick="tab('obl',3)">Obligaciones</button>
+</div>
+
+<!-- ════ TAB 1: COMPARADOR ════ -->
+<div id="pane-cmp" class="pane active">
+
+  <div class="warn-box blue" style="margin-bottom:20px">
+    <div class="warn-title">El punto de partida</div>
+    <p>Primer día de prueba: <strong>39 unidades de Ensure 800g</strong> vendidas en MercadoLibre, <strong>$2.531.100 facturados</strong> en un día. Vendiendo 24/7 los 30 días, la proyección supera ampliamente cualquier tope de monotributo. Abajo se comparan las tres estructuras posibles con tus números reales.</p>
+  </div>
+
+  <h2 class="section-h">Parámetros</h2>
+  <p class="section-sub">Ajustá todo acá. Las tres columnas de abajo se recalculan en vivo.</p>
+
+  <div class="inputs">
+    <div class="inputs-grid">
+      <div>
+        <div class="ig-title">Ventas</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Unidades por día</span><span class="sl-val" id="v-units">20</span></div><input type="range" id="sl-units" min="5" max="100" value="20" oninput="sv('units',this.value,'v-units',0)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Días por mes</span><span class="sl-val" id="v-days">30</span></div><input type="range" id="sl-days" min="15" max="30" value="30" oninput="sv('days',this.value,'v-days',0)"></div>
+        <div class="ig-title" style="margin-top:10px">Precio y costos unitarios</div>
+        <div class="sl-group">
+          <div class="sl-row"><span class="sl-label">Precio de venta</span><input type="text" class="num-in" id="ni-price" value="64.900" oninput="niMoney('ni-price','price','sl-price')" onblur="niFmt('ni-price')"></div>
+          <input type="range" id="sl-price" min="30000" max="100000" step="500" value="64900" oninput="st.price=+this.value;upd()">
+        </div>
+        <div class="sl-group">
+          <div class="sl-row"><span class="sl-label">Costo producto (neto IVA)</span><input type="text" class="num-in" id="ni-prodcost" value="23.690" oninput="niMoney('ni-prodcost','prodCost','sl-prodcost')" onblur="niFmt('ni-prodcost')"></div>
+          <input type="range" id="sl-prodcost" min="5000" max="50000" step="500" value="23690" oninput="st.prodCost=+this.value;upd()">
+        </div>
+        <div class="sl-group">
+          <div class="sl-row">
+            <span class="sl-label">Comisión ML</span>
+            <div style="display:flex;gap:5px;align-items:center">
+              <input type="text" class="num-in" id="ni-mlcom" value="10.274" oninput="niMoney('ni-mlcom','mlComision','sl-mlcom')" onblur="niFmt('ni-mlcom')">
+              <span style="font-size:11px;color:var(--muted)">o</span>
+              <input type="number" class="num-in" id="ni-mlpct" value="15.83" min="0" max="30" step="0.1" style="width:52px" oninput="st.mlComision=st.price*(+this.value||0)/100;el('ni-mlcom').value=fmtN(Math.round(st.mlComision));el('sl-mlcom').value=st.mlComision;upd()">
+              <span style="font-size:11px;color:var(--muted)">%</span>
+            </div>
+          </div>
+          <input type="range" id="sl-mlcom" min="1000" max="20000" step="100" value="10273.7" oninput="st.mlComision=+this.value;upd()">
+        </div>
+        <div class="sl-group">
+          <div class="sl-row"><span class="sl-label">Envío ML</span><input type="text" class="num-in" id="ni-ship" value="7.470" oninput="niMoney('ni-ship','mlShip','sl-ship')" onblur="niFmt('ni-ship')"></div>
+          <input type="range" id="sl-ship" min="1000" max="15000" step="100" value="7470" oninput="st.mlShip=+this.value;upd()">
+        </div>
+        <div class="sl-group">
+          <div class="sl-row"><span class="sl-label">Cuotas sin interés (%)</span><input type="number" class="num-in" id="ni-cuo" value="8.4" min="0" max="30" step="0.1" oninput="st.cuotasPct=+this.value||0;upd()"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">0 = sin cuotas · default 8.4%</div>
+        </div>
+      </div>
+      <div>
+        <div class="ig-title">Costos variables (por unidad)</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Comisión lab vendedor</div>
+        <div class="tog"><button class="tog-btn active" id="b-labf" onclick="labMode('fijo')">$ fijo</button><button class="tog-btn" id="b-labp" onclick="labMode('pct')">% de venta</button></div>
+        <div class="sl-group" id="lab-fijo-grp"><div class="sl-row"><span class="sl-label">Monto fijo por unidad</span><span class="sl-val" id="v-lab">$1.000</span></div><input type="range" id="sl-lab" min="0" max="3000" step="100" value="1000" oninput="sv('labCom',this.value,'v-lab',1)"></div>
+        <div class="sl-group" id="lab-pct-grp" style="display:none"><div class="sl-row"><span class="sl-label">% del precio de venta</span><span class="sl-val" id="v-labp">1%</span></div><input type="range" id="sl-labp" min="0" max="5" step="0.25" value="1" oninput="svlp(this.value)"></div>
+        <div id="lab-eq" style="font-size:11px;color:var(--muted);margin:-6px 0 12px"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Retenciones ML / IIBB</span><span class="sl-val" id="v-iibb">5%</span></div><input type="range" id="sl-iibb" min="3" max="8" step="0.5" value="5" oninput="svp('iibbPct',this.value,'v-iibb')"></div>
+      </div>
+      <div>
+        <div class="ig-title">Costos fijos mensuales</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Autónomos por socio</span><span class="sl-val" id="v-auto">$120.000</span></div><input type="range" id="sl-auto" min="0" max="400000" step="10000" value="120000" oninput="sv('autonomos',this.value,'v-auto',1)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Contador + balance (SRL)</span><span class="sl-val" id="v-cont">$200.000</span></div><input type="range" id="sl-cont" min="0" max="600000" step="10000" value="200000" oninput="sv('contadorSRL',this.value,'v-cont',1)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Cuota monotributo</span><span class="sl-val" id="v-mono">$600.000</span></div><input type="range" id="sl-mono" min="50000" max="1000000" step="10000" value="600000" oninput="sv('monoFee',this.value,'v-mono',1)"></div>
+      </div>
+      <div>
+        <div class="ig-title">Impuestos y retiro</div>
+        <div class="sl-group">
+          <div class="sl-row"><span class="sl-label">Deducciones anuales (MNI + ded.esp. + OSPE)</span><input type="text" class="num-in" id="ni-dedper" value="17.623.207" style="width:96px" oninput="niMoney('ni-dedper','dedPer','sl-dedper')" onblur="niFmt('ni-dedper')"></div>
+          <input type="range" id="sl-dedper" min="0" max="30000000" step="500000" value="17623207" oninput="st.dedPer=+this.value;upd()">
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">MNI $3.916.268 + Ded.Esp. $13.706.939 · Escala art.94 ARCA 2025</div>
+        </div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Honorarios por socio (SRL)</span><span class="sl-val" id="v-hon">$800.000</span></div><input type="range" id="sl-hon" min="200000" max="3000000" step="50000" value="800000" oninput="sv('honorarios',this.value,'v-hon',1)"></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.4">Vos elegís cuánto cobrás. El resto queda capitalizado en la SRL.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-h">Las tres estructuras, lado a lado</h2>
+  <p class="section-sub">Mismo volumen de ventas, distinta forma jurídica. El número grande es lo que le queda a cada socio por mes.</p>
+
+  <div class="compare">
+    <!-- MONO -->
+    <div class="scn">
+      <div class="scn-head">
+        <div class="scn-name">Monotributo</div>
+        <span class="scn-badge badge-r">No viable a escala</span>
+      </div>
+      <div class="scn-hero">
+        <div class="scn-hero-label">Por socio / mes (reparto ÷2)</div>
+        <div class="scn-hero-val" id="m-hero">—</div>
+        <div class="scn-hero-sub">sin Ganancias extra (mono ya tributa)</div>
+      </div>
+      <div class="scn-body">
+        <div class="scn-line"><span class="l">Facturación</span><span class="v" id="m-rev">—</span></div>
+        <div class="scn-line neg"><span class="l">Producto (IVA incluido, no recupera)</span><span class="v" id="m-prod">—</span></div>
+        <div class="scn-line neg"><span class="l">ML + envío + cuotas</span><span class="v" id="m-ml">—</span></div>
+        <div class="scn-line neg"><span class="l">IIBB / retenciones</span><span class="v" id="m-iibb">—</span></div>
+        <div class="scn-line neg"><span class="l">Comisión lab</span><span class="v" id="m-lab">—</span></div>
+        <div class="scn-line neg"><span class="l">Cuota monotributo</span><span class="v" id="m-fee">—</span></div>
+        <div class="scn-line tot"><span class="l">Resultado del negocio</span><span class="v" id="m-net">—</span></div>
+      </div>
+      <div class="scn-foot">
+        <div class="scn-note note-r" id="m-note">El IVA pagado en compras se pierde (no recupera). Y el tope anual hace inviable este volumen.</div>
+      </div>
+    </div>
+
+    <!-- 1 RI -->
+    <div class="scn">
+      <div class="scn-head">
+        <div class="scn-name">1 Responsable Inscripto</div>
+        <span class="scn-badge badge-a">Funciona, pero el reparto es informal</span>
+      </div>
+      <div class="scn-hero">
+        <div class="scn-hero-label">Por socio / mes (50/50)</div>
+        <div class="scn-hero-val" id="r-hero">—</div>
+        <div class="scn-hero-sub">neto después de Ganancias personal</div>
+      </div>
+      <div class="scn-body">
+        <div class="scn-line"><span class="l">Facturación</span><span class="v" id="r-rev">—</span></div>
+        <div class="scn-line neg"><span class="l">Producto (neto, IVA recuperado)</span><span class="v" id="r-prod">—</span></div>
+        <div class="scn-line neg"><span class="l">ML + envío + cuotas</span><span class="v" id="r-ml">—</span></div>
+        <div class="scn-line iva"><span class="l">IVA neto a AFIP</span><span class="v" id="r-iva">—</span></div>
+        <div class="scn-line neg"><span class="l">IIBB / retenciones</span><span class="v" id="r-iibb">—</span></div>
+        <div class="scn-line neg"><span class="l">Comisión lab</span><span class="v" id="r-lab">—</span></div>
+        <div class="scn-line neg"><span class="l">Autónomos (1 persona)</span><span class="v" id="r-auto">—</span></div>
+        <div class="scn-line tot"><span class="l">Ganancia bruta (tributaria)</span><span class="v" id="r-gross">—</span></div>
+        <div class="scn-line neg"><span class="l">Ganancias personal (escala 2025)</span><span class="v" id="r-ganancias">—</span></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right;margin:-6px 0 4px" id="r-effrate"></div>
+        <div class="scn-line tot"><span class="l">Ganancia neta total</span><span class="v" id="r-net">—</span></div>
+        <div class="scn-line" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--border)"><span class="l" style="font-weight:600">Por socio (÷2)</span><span class="v" id="r-per-socio" style="font-weight:700;font-size:15px;color:var(--green)">—</span></div>
+      </div>
+      <div class="scn-foot">
+        <div class="scn-note note-a">Una sola persona factura todo. Para que el pago al socio sea deducible, el socio debe tener su propio CUIT y facturar. Si no, el RI paga Ganancias sobre el 100%. Sin separación de patrimonio.</div>
+      </div>
+    </div>
+
+    <!-- SRL -->
+    <div class="scn rec">
+      <div class="scn-head">
+        <div class="scn-name">SRL · 2 socios</div>
+        <span class="scn-badge badge-g">Recomendado</span>
+      </div>
+      <div class="scn-hero">
+        <div class="scn-hero-label">Por socio / mes (en mano)</div>
+        <div class="scn-hero-val" id="s-hero">—</div>
+        <div class="scn-hero-sub">honorarios netos de Ganancias</div>
+      </div>
+      <div class="scn-body">
+        <div class="scn-line"><span class="l">Facturación</span><span class="v" id="s-rev">—</span></div>
+        <div class="scn-line neg"><span class="l">Producto (neto, IVA recuperado)</span><span class="v" id="s-prod">—</span></div>
+        <div class="scn-line neg"><span class="l">ML + envío + cuotas</span><span class="v" id="s-ml">—</span></div>
+        <div class="scn-line iva"><span class="l">IVA neto a AFIP</span><span class="v" id="s-iva">—</span></div>
+        <div class="scn-line neg"><span class="l">IIBB / retenciones</span><span class="v" id="s-iibb">—</span></div>
+        <div class="scn-line neg"><span class="l">Comisión lab</span><span class="v" id="s-lab">—</span></div>
+        <div class="scn-line" style="font-size:11px;color:var(--muted)"><span class="l">Autónomos socios (gasto personal, no SRL)</span><span class="v" id="s-auto">—</span></div>
+        <div class="scn-line neg"><span class="l">Contador + balance</span><span class="v" id="s-cont">—</span></div>
+        <div class="scn-line neg"><span class="l">Honorarios (2 socios)</span><span class="v" id="s-hon">—</span></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right;margin:-6px 0 4px" id="s-hon-eff"></div>
+        <div id="s-hon-warn" style="font-size:11px;color:#c0392b;background:#fdecea;border-radius:4px;padding:4px 8px;margin:-2px 0 6px;display:none">⚠ Supera el 25% deducible. El exceso no es gasto deducible para la SRL.</div>
+        <div class="scn-line tot"><span class="l">Ganancia SRL (antes imp.)</span><span class="v" id="s-pre">—</span></div>
+        <div class="scn-line neg"><span class="l">Ganancias SRL (escala progresiva)</span><span class="v" id="s-corpgan">—</span></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right;margin:-6px 0 4px" id="s-effrate"></div>
+        <div class="scn-line tot"><span class="l">Capitaliza en la empresa</span><span class="v" id="s-ret">—</span></div>
+      </div>
+      <div class="scn-foot">
+        <div class="scn-note note-g">Estructura formal: el estatuto define el reparto con tu socio. Patrimonio personal protegido. Las utilidades se retienen a tasa corporativa y se distribuyen como dividendos (7%) cuando convenga.</div>
+        <div class="scn-extra" id="s-extra">Cada socio además acumula su parte de lo capitalizado: <strong id="s-share">—</strong>/mes disponible vía dividendos (neto del 7%).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn-box amber">
+    <div class="warn-title">Cómo leer la comparación</div>
+    <p>El Monotributo muestra el resultado más alto por unidad — pero no recupera IVA y, sobre todo, <strong>su tope anual se agota en semanas</strong> a este volumen, así que no es una opción real. Entre <strong>1 RI</strong> y <strong>SRL</strong>, el resultado operativo es casi igual; la diferencia está en que la SRL te deja controlar cuánto Ganancias pagás (vía honorarios) y retener el resto a tasa corporativa, además de blindar el patrimonio y formalizar la sociedad. Con tu esposa contadora, el costo del contador es bajo.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="u-title">Detalle por unidad</div>
+    <table class="unit-table">
+      <tr><td class="name">Precio de venta</td><td class="val" id="u-price">$64.900</td></tr>
+      <tr><td class="name">Producto (neto, IVA recuperado)</td><td class="val" id="u-prod">−$23.690</td></tr>
+      <tr><td class="name">Comisión ML</td><td class="val" id="u-ml">−$10.274</td></tr>
+      <tr id="u-cuo-row"><td class="name">Cuotas sin interés (12)</td><td class="val" id="u-cuo">−$5.452</td></tr>
+      <tr><td class="name">Envío ML</td><td class="val" id="u-ship">−$7.470</td></tr>
+      <tr><td class="name" id="u-iibb-l">IIBB / retenciones (5%)</td><td class="val" id="u-iibb">−$3.245</td></tr>
+      <tr id="u-lab-row"><td class="name">Comisión lab vendedor</td><td class="val" id="u-lab">−$1.000</td></tr>
+      <tr class="iva"><td class="name">IVA neto a AFIP</td><td class="val" id="u-iva">−$3.209</td></tr>
+      <tr class="profit"><td class="name">Ganancia por unidad</td><td class="val" id="u-net">$5.586</td></tr>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">Los costos fijos (autónomos, contador) y la Ganancias personal se aplican sobre el total mensual, no por unidad. Ver el comparador arriba.</p>
+  </div>
+
+</div>
+
+<!-- ════ TAB 2: IMPUESTOS ════ -->
+<div id="pane-imp" class="pane">
+  <h2 class="section-h">Por qué el Monotributo no es opción</h2>
+  <p class="section-sub">A este volumen se agota en semanas. La escala obliga a Responsable Inscripto desde el día uno.</p>
+  <div class="warn-box red">
+    <div class="warn-title">El tope del Monotributo</div>
+    <p>La categoría más alta (K - Comercio) tiene un tope aproximado de <strong>$90–100M anuales</strong>. Vendiendo 25 unidades/día los 30 días, la facturación proyectada ronda los <strong id="imp-annual">$584M anuales</strong> — varias veces el límite. <span id="imp-weeks">Lo agotarías en pocas semanas.</span></p>
+  </div>
+
+  <h2 class="section-h" style="margin-top:20px">Persona Física RI vs SRL</h2>
+  <p class="section-sub">Ambas son Responsable Inscripto. La diferencia es la estructura legal y el control de los impuestos personales.</p>
+  <table class="comp-table">
+    <thead><tr><th>Concepto</th><th>1 Persona Física RI</th><th class="rec">SRL · 2 socios ✓</th></tr></thead>
+    <tbody>
+      <tr><td>Quién factura</td><td>1 sola persona</td><td class="ok">La sociedad</td></tr>
+      <tr><td>Pago al socio</td><td class="no">El socio debe facturar aparte (lío)</td><td class="ok">Honorarios definidos en el estatuto</td></tr>
+      <tr><td>Ganancias empresarial</td><td>No aplica</td><td class="ok">25–35% solo sobre lo retenido</td></tr>
+      <tr><td>Ganancias personal</td><td class="no">35% sobre toda la ganancia</td><td class="ok">Solo sobre honorarios retirados</td></tr>
+      <tr><td>Control de cuándo tributar</td><td class="no">No</td><td class="ok">Sí, vía honorarios/dividendos</td></tr>
+      <tr><td>Patrimonio personal</td><td class="no">Responde con bienes propios</td><td class="ok">Responsabilidad limitada</td></tr>
+      <tr><td>Capital de trabajo</td><td class="no">Difícil de separar</td><td class="ok">La empresa acumula pre-impuesto</td></tr>
+      <tr><td>Balance anual</td><td class="ok">No</td><td class="med">Sí (ante DPPJ Santa Fe)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box green">
+    <div class="warn-title">El argumento clave para la SRL</div>
+    <p>Como PH RI, toda la ganancia es renta personal al 35%. En SRL fijás honorarios razonables (pagás Ganancias solo sobre eso) y el resto se capitaliza a tasa corporativa. Distribuís dividendos (7%) cuando conviene. Además, el estatuto formaliza el reparto con tu socio desde el día uno — sin acuerdos informales.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">El IVA por unidad (Ensure 800)</div>
+    <table class="unit-table">
+      <tr><td class="name">IVA cobrado en ventas (débito)</td><td class="val" style="color:var(--red)">$11.264</td></tr>
+      <tr><td class="name">Crédito: IVA a Abbott</td><td class="val" style="color:var(--green)">−$4.975</td></tr>
+      <tr><td class="name">Crédito: IVA comisión ML</td><td class="val" style="color:var(--green)">−$1.783</td></tr>
+      <tr><td class="name">Crédito: IVA envío ML</td><td class="val" style="color:var(--green)">−$1.296</td></tr>
+      <tr><td class="name">IVA neto a pagar a AFIP</td><td class="val" style="color:var(--red);font-weight:700">$3.210</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6">Como RI pagás IVA solo sobre el valor que agregás. El monotributo no paga IVA al vender, pero tampoco recupera el IVA de las compras — y tiene tope.</p>
+  </div>
+</div>
+
+<!-- ════ TAB 3: RETIRO ════ -->
+<div id="pane-ret" class="pane">
+  <h2 class="section-h">¿Cómo sacás plata de la SRL cada mes?</h2>
+  <p class="section-sub">Tres mecanismos formales. Uno para el día a día, los otros complementarios.</p>
+
+  <div class="retiro-card">
+    <div class="retiro-head"><div class="retiro-title">1. Honorarios de gerente</div><span class="badge g">El flujo mensual</span></div>
+    <div class="retiro-body">
+      <p>El socio gerente cobra un monto mensual fijo aprobado en el estatuto o asamblea. Es el mecanismo estándar para tener cash personal continuo. Lo definís vos (el slider del comparador te deja calibrarlo).</p>
+      <p>Son deducibles para la empresa (bajan el impuesto corporativo), y pagás Ganancias personal sobre lo recibido. Límite deducible: hasta el 25% de la utilidad contable, con tope por persona.</p>
+    </div>
+    <ul class="steps">
+      <li><span class="step-n">1</span><span class="step-t"><strong>Definir el monto</strong> en el estatuto al constituir la SRL</span></li>
+      <li><span class="step-n">2</span><span class="step-t"><strong>Pagar mensualmente</strong> con recibo de honorarios (autónomo)</span></li>
+      <li><span class="step-n">3</span><span class="step-t"><strong>Declarar</strong> en Ganancias anual (3ra categoría)</span></li>
+    </ul>
+  </div>
+
+  <div class="retiro-card">
+    <div class="retiro-head"><div class="retiro-title">2. Distribución de dividendos</div><span class="badge b">Complemento anual</span></div>
+    <div class="retiro-body">
+      <p>Aprobada en asamblea tras cerrar el ejercicio. La SRL ya pagó Ganancias corporativas; al distribuir retiene el <strong>7%</strong> sobre el importe. El socio recibe el neto (93%) — para personas humanas ese 7% es el impuesto final.</p>
+      <p>Es la forma de retirar lo que dejaste capitalizado en la empresa durante el año.</p>
+    </div>
+  </div>
+
+  <div class="retiro-card">
+    <div class="retiro-head"><div class="retiro-title">3. Retirar cash sin documentación</div><span class="badge r">Evitar</span></div>
+    <div class="retiro-body">
+      <p>La cuenta de la SRL no es tu cuenta. Sacar plata sin respaldo puede tratarse como dividendo en especie, con ajustes y multas. Todo movimiento necesita su documento: recibo, acta o contrato de mutuo.</p>
+    </div>
+  </div>
+
+  <div class="retiro-card">
+    <div class="retiro-head"><div class="retiro-title">Estrategia recomendada</div><span class="badge a">Para tu caso</span></div>
+    <div class="retiro-body">
+      <p><strong>Mes a mes:</strong> honorarios que cubran tu costo de vida; el resto queda como capital de trabajo para recomprar stock y crecer.</p>
+      <p><strong>Al año:</strong> evaluás distribuir dividendos o reinvertir. Retener a 25–35% corporativo es más eficiente que distribuir todo y pagar 35% personal.</p>
+      <p><strong>Factor clave:</strong> con contadora como socia operativa, el costo de la SRL es bajo. La estructura tiene sentido desde el día uno.</p>
+    </div>
+  </div>
+  <div class="warn-box blue">
+    <div class="warn-title">Sobre formalizar con tu socio</div>
+    <p>Definir por escrito cómo se reparte la ganancia antes de que haya plata es crítico. La SRL lo resuelve: el estatuto fija participaciones, honorarios y condiciones de salida desde el inicio. Un acuerdo verbal es difícil de hacer valer.</p>
+  </div>
+</div>
+
+<!-- ════ TAB 4: OBLIGACIONES ════ -->
+<div id="pane-obl" class="pane">
+  <h2 class="section-h">Qué hay que presentar y pagar</h2>
+  <p class="section-sub">Obligaciones de una SRL en Santa Fe como Responsable Inscripto.</p>
+  <div class="card">
+    <div class="card-title">Mensuales</div>
+    <div class="oblig-label">AFIP — Nacional</div>
+    <div class="oblig-row"><div class="oblig-name">IVA</div><div><span class="oblig-period">Mensual</span></div><div class="oblig-desc">DDJJ + pago. Débito (ventas) menos crédito (compras y gastos).</div></div>
+    <div class="oblig-row"><div class="oblig-name">Anticipos Ganancias</div><div><span class="oblig-period">10/año</span></div><div class="oblig-desc">% del impuesto del año anterior. El primer ejercicio no tiene anticipos.</div></div>
+    <div class="oblig-row"><div class="oblig-name">Autónomos (gerente)</div><div><span class="oblig-period">Mensual</span></div><div class="oblig-desc">Obligatorio aunque no haya actividad. Cubre jubilación + obra social.</div></div>
+    <div class="oblig-row"><div class="oblig-name">F931 (empleados)</div><div><span class="oblig-period">Mensual</span></div><div class="oblig-desc">Solo con personal en relación de dependencia (~27% sobre bruto).</div></div>
+    <div class="oblig-label" style="margin-top:8px">API — Santa Fe</div>
+    <div class="oblig-row"><div class="oblig-name">Ingresos Brutos</div><div><span class="oblig-period">Mensual</span></div><div class="oblig-desc">Alícuota según actividad. Comercio ≈ 3%. Convenio Multilateral si opera en varias provincias.</div></div>
+    <div class="oblig-label" style="margin-top:8px">Municipio</div>
+    <div class="oblig-row"><div class="oblig-name">Tasa comercial</div><div><span class="oblig-period">Mensual</span></div><div class="oblig-desc">Varía por municipio y actividad.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Anuales</div>
+    <div class="oblig-row"><div class="oblig-name">Ganancias SRL</div><div><span class="oblig-period">Anual</span></div><div class="oblig-desc">DDJJ al 5° mes del cierre. Más 7% al distribuir dividendos.</div></div>
+    <div class="oblig-row"><div class="oblig-name">Bienes Personales</div><div><span class="oblig-period">Anual</span></div><div class="oblig-desc">La SRL paga como responsable sustituto por las participaciones.</div></div>
+    <div class="oblig-row"><div class="oblig-name">Balance contable</div><div><span class="oblig-period">Anual</span></div><div class="oblig-desc">Obligatorio. Firmado por contador. Se presenta ante DPPJ Santa Fe.</div></div>
+    <div class="oblig-row"><div class="oblig-name">Asamblea ordinaria</div><div><span class="oblig-period">Anual</span></div><div class="oblig-desc">Dentro de 4 meses del cierre. Aprueba balance y distribución.</div></div>
+    <div class="oblig-row"><div class="oblig-name">Ganancias (socios)</div><div><span class="oblig-period">Anual</span></div><div class="oblig-desc">Cada socio declara honorarios, dividendos e ingresos personales.</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Próximos pasos para arrancar</div>
+    <ul class="steps">
+      <li><span class="step-n">1</span><span class="step-t"><strong>Definir estructura:</strong> SRL recomendada. Con contadora interna, tiene sentido desde el inicio.</span></li>
+      <li><span class="step-n">2</span><span class="step-t"><strong>Constituir la SRL:</strong> escribano → estatuto → Boletín Oficial → DPPJ → AFIP → API → municipio.</span></li>
+      <li><span class="step-n">3</span><span class="step-t"><strong>Certificado MiPyME:</strong> trámite gratuito online en AFIP. Beneficios impositivos.</span></li>
+      <li><span class="step-n">4</span><span class="step-t"><strong>Cuenta bancaria de la SRL:</strong> todas las operaciones del negocio pasan por ahí.</span></li>
+      <li><span class="step-n">5</span><span class="step-t"><strong>Formalizar con el socio:</strong> participación, honorarios y salida en el estatuto.</span></li>
+      <li><span class="step-n">6</span><span class="step-t"><strong>Capital de trabajo:</strong> definir stock para sostener el volumen y reponer rápido.</span></li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <strong>Información orientativa — no constituye asesoramiento contable ni legal.</strong><br>
+  Consultar con un contador público matriculado para valores y normativa vigente.<br>
+  Cifras en pesos argentinos (ARS) · Precios: MercadoLibre Argentina · Estructura: AFIP / API Santa Fe
+</div>
+
+<script>
+const CUOTAS_COST=5451.6;
+function getVars(){
+  const PRICE=st.price,ML_FEE=st.mlComision,SHIP=st.mlShip,PROD_NET=st.prodCost,PROD_IVA=PROD_NET*0.21,PROD_TOTAL=PROD_NET+PROD_IVA;
+  return {PRICE,ML_FEE,SHIP,PROD_NET,PROD_IVA,PROD_TOTAL};
+}
+
+// Escala art.94 Personas Humanas 2025 (ARCA) — recibe ingreso ANUAL
+function personalTax(y){
+  if(y<=0)return 0;
+  if(y<=1749901.45)return y*0.05;
+  if(y<=3499802.89)return 87495.07+(y-1749901.45)*0.09;
+  if(y<=5249704.34)return 244986.20+(y-3499802.89)*0.12;
+  if(y<=7874556.52)return 454974.38+(y-5249704.34)*0.15;
+  if(y<=15749113.04)return 848702.20+(y-7874556.52)*0.19;
+  if(y<=23623669.56)return 2344867.94+(y-15749113.04)*0.23;
+  if(y<=35435504.34)return 4156015.94+(y-23623669.56)*0.27;
+  if(y<=53153256.52)return 7345211.33+(y-35435504.34)*0.31;
+  return 12837714.51+(y-53153256.52)*0.35;
+}
+// Escala Ganancias Personas Jurídicas 2025 (ARCA) — anualizada
+function corpTax(annualProfit){
+  if(annualProfit<=0)return 0;
+  const b1=101679575.26,b2=1016795752.62;
+  if(annualProfit<=b1)return annualProfit*0.25;
+  if(annualProfit<=b2)return 25419893.82+(annualProfit-b1)*0.30;
+  return 299954747.02+(annualProfit-b2)*0.35;
+}
+
+function calc(){
+  const v=getVars(),{PRICE,ML_FEE,SHIP,PROD_NET,PROD_IVA,PROD_TOTAL}=v;
+  const U=st.units*st.days, rev=PRICE*U;
+  const cuo=PRICE*st.cuotasPct/100;
+  const iibbPer=PRICE*st.iibbPct/100;
+  const labPer=st.labMode==='pct'?PRICE*st.labPct/100:st.labCom;
+  const ivaDeb=(PRICE/1.21)*0.21, ivaCred=PROD_IVA+(ML_FEE/1.21)*0.21+(SHIP/1.21)*0.21, ivaNetPer=ivaDeb-ivaCred;
+  const mlBlock=ML_FEE+cuo+SHIP;
+  const monoVar=PROD_TOTAL+mlBlock+iibbPer+labPer;
+  const monoGross=(PRICE-monoVar)*U;
+  const monoNet=monoGross-st.monoFee;
+  const monoPer=monoNet/2;
+  const riVar=PROD_NET+mlBlock+iibbPer+labPer+ivaNetPer;
+  const riGross=(PRICE-riVar)*U;
+  const riBusiness=riGross-st.autonomos;
+  // RI personal tax — escala progresiva art.94
+  const riBizPer=riBusiness/2;
+  const riTaxBase=Math.max(0,riBizPer*12-st.dedPer);
+  const riPersonalTax=personalTax(riTaxBase)/12;
+  const riPer=riBizPer-riPersonalTax;
+  const riEffPersonal=riBizPer>0?riPersonalTax/riBizPer:0;
+  // SRL honorarios — escala progresiva art.94
+  const srlTaxBase=Math.max(0,st.honorarios*12-st.dedPer);
+  const srlPersonalTax=personalTax(srlTaxBase)/12;
+  const srlSocioPocket=st.honorarios-srlPersonalTax;
+  const srlEffPersonal=st.honorarios>0?srlPersonalTax/st.honorarios:0;
+  // SRL
+  const srlGross=(PRICE-riVar)*U;
+  const srlOp=srlGross-st.contadorSRL;
+  const srlPre=srlOp-st.honorarios*2;
+  // 25% deductibilidad honorarios (sobre utilidad antes de honorarios)
+  const srlMaxHon=srlOp>0?srlOp*0.25/2:0;
+  // Escala progresiva: anualizamos, aplicamos escala, devolvemos mensual
+  const srlAnnual=Math.max(0,srlPre*12);
+  const srlCorp=corpTax(srlAnnual)/12;
+  const srlEffRate=srlAnnual>0?corpTax(srlAnnual)/srlAnnual:0;
+  const srlRet=srlPre-srlCorp;
+  const srlShare=(srlRet/2)*0.93;
+  return {U,rev,cuo,iibbPer,ivaNetPer,mlBlock,labPer,
+    monoGross,monoNet,monoPer,monoVar,
+    riGross,riBusiness,riBizPer,riPersonalTax,riPer,riEffPersonal,
+    srlOp,srlPre,srlCorp,srlEffRate,srlRet,srlShare,srlSocioPocket,srlPersonalTax,srlEffPersonal,srlMaxHon,
+    annualRev:rev*12};
+}
+const st={units:20,days:30,price:64900,prodCost:23690,mlComision:10273.7,mlShip:7470,cuotasPct:8.4,labCom:1000,labMode:'fijo',labPct:1,iibbPct:5,dedPer:17623207,autonomos:120000,contadorSRL:200000,honorarios:800000,monoFee:600000};
+
+function f(n){if(n==null||isNaN(n))return'—';const a=Math.abs(n),s=n<0?'−\u2009':'';if(a>=1e6)return s+'$'+(a/1e6).toFixed(2)+'M';if(a>=1e3)return s+'$'+Math.round(a).toLocaleString('es-AR');return s+'$'+Math.round(a)}
+function el(id){return document.getElementById(id)}
+function T(id,v){const e=el(id);if(e)e.textContent=v}
+function A(id,on){const e=el(id);if(e)e.classList.toggle('active',on)}
+function S(id,on){const e=el(id);if(e)e.style.display=on?'':'none'}
+
+function fmtN(v){return Math.round(Number(v)||0).toLocaleString('es-AR');}
+function parseN(v){return Number(String(v).replace(/\./g,'').replace(',','.')||0);}
+function niMoney(id,stKey,sliderId){const v=parseN(el(id).value);st[stKey]=v;if(el(sliderId))el(sliderId).value=v;upd();}
+function niFmt(id){const e=el(id);if(e)e.value=fmtN(parseN(e.value));}
+function syncNi(id,val){const e=el(id);if(e&&document.activeElement!==e)e.value=fmtN(val);}
+
+function upd(){
+  const r=calc();
+  syncNi('ni-price',st.price);syncNi('ni-prodcost',st.prodCost);
+  syncNi('ni-mlcom',Math.round(st.mlComision));syncNi('ni-ship',st.mlShip);syncNi('ni-dedper',st.dedPer);
+  T('h-rev',f(r.rev));T('h-units',r.U+' u · '+st.units+'/día × '+st.days);
+  T('h-net',f(r.riBusiness));T('h-pocket',f(r.srlSocioPocket));
+  // Per-unit table
+  T('u-title','Detalle por unidad — costo $'+Math.round(st.prodCost)+' · venta $'+Math.round(st.price));
+  T('u-price',f(st.price));T('u-prod',f(-st.prodCost));
+  T('u-ml',f(-st.mlComision));T('u-ship',f(-st.mlShip));T('u-cuo',f(-r.cuo));
+  T('u-iibb',f(-r.iibbPer));T('u-iibb-l','IIBB / retenciones ('+st.iibbPct+'%)');
+  T('u-lab',f(-r.labPer));T('u-iva',f(-r.ivaNetPer));
+  const unitNet=st.price-st.prodCost-st.mlComision-r.cuo-st.mlShip-r.iibbPer-r.labPer-r.ivaNetPer;
+  T('u-net',f(unitNet));
+  S('u-cuo-row',r.cuo>0);S('u-lab-row',r.labPer>0);
+  if(st.labMode==='pct'){T('lab-eq',st.labPct+'% de $'+Math.round(st.price)+' = '+f(st.price*st.labPct/100)+' por unidad');}
+  else{T('lab-eq',f(st.labCom)+' = '+(st.labCom/st.price*100).toFixed(2)+'% del precio');}
+  // Sync number inputs
+  const nimlpct=el('ni-mlpct');if(nimlpct)nimlpct.value=(st.mlComision/st.price*100).toFixed(2);
+  // MONO card
+  T('m-hero',f(r.monoPer));T('m-rev',f(r.rev));T('m-prod',f(-st.prodCost*1.21*r.U));
+  T('m-ml',f(-r.mlBlock*r.U));T('m-iibb',f(-r.iibbPer*r.U));T('m-lab',f(-r.labPer*r.U));
+  T('m-fee',f(-st.monoFee));T('m-net',f(r.monoNet));
+  // RI card
+  T('r-hero',f(r.riPer));T('r-rev',f(r.rev));T('r-prod',f(-st.prodCost*r.U));
+  T('r-ml',f(-r.mlBlock*r.U));T('r-iva',f(-r.ivaNetPer*r.U));T('r-iibb',f(-r.iibbPer*r.U));
+  T('r-lab',f(-r.labPer*r.U));T('r-auto',f(-st.autonomos));
+  T('r-gross',f(r.riBusiness));
+  T('r-ganancias',f(-r.riPersonalTax*2));
+  T('r-effrate','Tasa efectiva: '+(r.riEffPersonal*100).toFixed(1)+'% · Escala art.94 ARCA 2025');
+  T('r-net',f(r.riPer*2));T('r-per-socio',f(r.riPer));
+  // SRL card
+  T('s-hero',f(r.srlSocioPocket));T('s-rev',f(r.rev));T('s-prod',f(-st.prodCost*r.U));
+  T('s-ml',f(-r.mlBlock*r.U));T('s-iva',f(-r.ivaNetPer*r.U));T('s-iibb',f(-r.iibbPer*r.U));
+  T('s-lab',f(-r.labPer*r.U));T('s-auto',f(-st.autonomos*2));T('s-cont',f(-st.contadorSRL));
+  T('s-hon',f(-st.honorarios*2));
+  T('s-hon-eff','Ganancias personal c/socio: '+f(-r.srlPersonalTax)+' · Tasa ef. '+(r.srlEffPersonal*100).toFixed(1)+'% · Net: '+f(r.srlSocioPocket)+'/mes');
+  S('s-hon-warn', st.honorarios > r.srlMaxHon);
+  T('s-pre',f(r.srlPre));T('s-corpgan',f(-r.srlCorp));
+  T('s-effrate','Tasa efectiva: '+(r.srlEffRate*100).toFixed(1)+'% · Escala 2025 ARCA');
+  T('s-ret',f(r.srlRet));
+  T('s-share',f(r.srlShare));S('s-extra',r.srlRet>0);
+  T('imp-annual',f(r.annualRev)+' anuales');
+  const weeks=Math.max(1,Math.round(95000000/(r.rev/4)));
+  T('imp-weeks','A este ritmo lo agotarías en aproximadamente '+weeks+' semanas.');
+}
+
+function sv(k,v,vid,cur){st[k]=Number(v);const e=el(vid);if(e)e.textContent=cur?f(Number(v)):v;upd()}
+function svp(k,v,vid){st[k]=Number(v);const e=el(vid);if(e)e.textContent=v+'%';upd()}
+function svlp(v){st.labPct=Number(v);T('v-labp',v+'%');upd()}
+function labMode(m){st.labMode=m;A('b-labf',m==='fijo');A('b-labp',m==='pct');S('lab-fijo-grp',m==='fijo');S('lab-pct-grp',m==='pct');upd()}
+function tog(k,v){st[k]=v;upd()}
+function tab(id,i){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el('pane-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn')[i].classList.add('active');
+}
+document.addEventListener('DOMContentLoaded',function(){
+  const d=new Date(),m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  T('hoy',d.getDate()+' de '+m[d.getMonth()]+' de '+d.getFullYear());
+  upd();
+});
+</script>
+</body>
+</html>
