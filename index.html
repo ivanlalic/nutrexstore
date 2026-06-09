@@ -172,7 +172,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
     </div>
     <div class="header-eyebrow">Análisis de Viabilidad</div>
     <h1>Simulador SRL — Venta en MercadoLibre Argentina</h1>
-    <div class="header-sub">2 socios operativos + tercero a definir · Proyecciones mensuales · <span id="hoy"></span></div>
+    <div class="header-sub">2 socios operativos + vendedor (comisión o socio) · Proyecciones mensuales · <span id="hoy"></span></div>
   </div>
 </header>
 
@@ -200,8 +200,8 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
         <div class="sl-group"><div class="sl-row"><span class="sl-label">Días por mes</span><span class="sl-val" id="v-days">30</span></div><input type="range" id="sl-days" min="15" max="30" value="30" oninput="sv('days',this.value,'v-days',0)"></div>
         <div class="ig-title" style="margin-top:10px">Producto</div>
         <div class="sl-group">
-          <div class="sl-row"><span class="sl-label">Precio de venta</span><input type="text" class="num-in" id="ni-price" value="64.900" oninput="niMoney('ni-price','price','sl-price')" onblur="niFmt('ni-price')"></div>
-          <input type="range" id="sl-price" min="5000" max="200000" step="500" value="64900" oninput="st.price=+this.value;upd()">
+          <div class="sl-row"><span class="sl-label">Precio de venta</span><input type="text" class="num-in" id="ni-price" value="58.900" oninput="st.price=parseN(this.value);st.mlComision=st.price*st.mlPct/100;el('sl-price').value=st.price;upd()" onblur="niFmt('ni-price')"></div>
+          <input type="range" id="sl-price" min="5000" max="200000" step="500" value="58900" oninput="st.price=+this.value;st.mlComision=st.price*st.mlPct/100;upd()">
         </div>
         <div class="sl-group">
           <div class="sl-row"><span class="sl-label">Costo producto (neto de IVA)</span><input type="text" class="num-in" id="ni-prodcost" value="23.690" oninput="niMoney('ni-prodcost','prodCost','sl-prodcost')" onblur="niFmt('ni-prodcost')"></div>
@@ -217,13 +217,14 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
           <div class="sl-row">
             <span class="sl-label">Comisión ML</span>
             <div style="display:flex;gap:5px;align-items:center">
-              <input type="text" class="num-in" id="ni-mlcom" value="10.274" oninput="niMoney('ni-mlcom','mlComision','sl-mlcom')" onblur="niFmt('ni-mlcom')">
+              <input type="text" class="num-in" id="ni-mlcom" value="9.324" oninput="st.mlComision=parseN(this.value);st.mlPct=st.price>0?st.mlComision/st.price*100:0;el('sl-mlcom').value=st.mlComision;upd()" onblur="niFmt('ni-mlcom')">
               <span style="font-size:11px;color:var(--muted)">o</span>
-              <input type="number" class="num-in" id="ni-mlpct" value="15.83" min="0" max="30" step="0.1" style="width:52px" oninput="st.mlComision=st.price*(+this.value||0)/100;el('ni-mlcom').value=fmtN(Math.round(st.mlComision));el('sl-mlcom').value=st.mlComision;upd()">
+              <input type="number" class="num-in" id="ni-mlpct" value="15.83" min="0" max="30" step="0.1" style="width:52px" oninput="st.mlPct=+this.value||0;st.mlComision=st.price*st.mlPct/100;el('ni-mlcom').value=fmtN(Math.round(st.mlComision));el('sl-mlcom').value=st.mlComision;upd()">
               <span style="font-size:11px;color:var(--muted)">%</span>
             </div>
           </div>
-          <input type="range" id="sl-mlcom" min="500" max="30000" step="100" value="10273.7" oninput="st.mlComision=+this.value;upd()">
+          <input type="range" id="sl-mlcom" min="500" max="30000" step="100" value="9324" oninput="st.mlComision=+this.value;st.mlPct=st.price>0?st.mlComision/st.price*100:0;upd()">
+          <div class="hint">El % queda fijo: si movés el precio, la comisión se recalcula sola.</div>
         </div>
         <div class="sl-group">
           <div class="sl-row"><span class="sl-label">Envío ML</span><input type="text" class="num-in" id="ni-ship" value="7.470" oninput="niMoney('ni-ship','mlShip','sl-ship')" onblur="niFmt('ni-ship')"></div>
@@ -238,14 +239,17 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
       </div>
       <div>
         <div class="ig-title">Costos fijos mensuales</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Autónomos por socio</span><span class="sl-val" id="v-auto">$120.000</span></div><input type="range" id="sl-auto" min="0" max="400000" step="10000" value="120000" oninput="sv('autonomos',this.value,'v-auto',1)"></div>
-        <div class="hint">Gasto personal de cada socio gerente. Se descuenta del bolsillo y de la base de Ganancias personal.</div>
-        <div class="sl-group" style="margin-top:10px"><div class="sl-row"><span class="sl-label">Contador + balance (SRL)</span><span class="sl-val" id="v-cont">$200.000</span></div><input type="range" id="sl-cont" min="0" max="600000" step="10000" value="200000" oninput="sv('contadorSRL',this.value,'v-cont',1)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Contador + balance (SRL)</span><span class="sl-val" id="v-cont">$200.000</span></div><input type="range" id="sl-cont" min="0" max="600000" step="10000" value="200000" oninput="sv('contadorSRL',this.value,'v-cont',1)"></div>
+        <div class="ig-title" style="margin-top:14px">Vendedor</div>
+        <div class="tog"><button class="tog-btn active" id="b-vcom" onclick="vendMode('com')">Comisión %</button><button class="tog-btn" id="b-vsoc" onclick="vendMode('soc')">Socio</button></div>
+        <div class="sl-group" id="g-vcom"><div class="sl-row"><span class="sl-label">Comisión sobre ventas</span><span class="sl-val" id="v-com1">2%</span></div><input type="range" id="sl-com1" min="0" max="6" step="0.25" value="2" oninput="svp('comPct',this.value,'v-com1')"></div>
+        <div class="sl-group" id="g-vsoc" style="display:none"><div class="sl-row"><span class="sl-label">Participación societaria</span><span class="sl-val" id="v-eq1">15%</span></div><input type="range" id="sl-eq1" min="5" max="35" step="1" value="15" oninput="svp('eqPct',this.value,'v-eq1')"></div>
+        <div class="hint">El switch cambia el resultado de abajo. La comparación detallada de las dos alternativas sigue en el tab "Tercero".</div>
       </div>
       <div>
         <div class="ig-title">Honorarios y deducciones</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Honorarios por socio (mensual)</span><span class="sl-val" id="v-hon">$800.000</span></div><input type="range" id="sl-hon" min="0" max="5000000" step="50000" value="800000" oninput="sv('honorarios',this.value,'v-hon',1)"></div>
-        <div class="hint">Vos elegís cuánto cobrás. Solo es deducible para la SRL hasta el 25% de la utilidad — el exceso ya se suma a la base del impuesto en el cálculo.</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Honorarios por socio (mensual)</span><span class="sl-val" id="v-hon">$0</span></div><input type="range" id="sl-hon" min="0" max="5000000" step="50000" value="0" oninput="sv('honorarios',this.value,'v-hon',1)"></div>
+        <div class="hint">Arranca en $0: subilo para simular retiros mensuales. Solo es deducible para la SRL hasta el 25% de la utilidad — el exceso ya se suma a la base del impuesto en el cálculo.</div>
         <div class="sl-group" style="margin-top:10px">
           <div class="sl-row"><span class="sl-label">Deducciones anuales por socio</span><input type="text" class="num-in" id="ni-dedper" value="11.748.804" style="width:96px" oninput="niMoney('ni-dedper','dedPer','sl-dedper')" onblur="niFmt('ni-dedper')"></div>
           <input type="range" id="sl-dedper" min="0" max="30000000" step="500000" value="11748804" oninput="st.dedPer=+this.value;upd()">
@@ -256,18 +260,18 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
   </div>
 
   <h2 class="section-h">Resultado mensual de la SRL</h2>
-  <p class="section-sub">Estructura base: SRL con 2 socios operativos. El tercero se analiza en su propio tab.</p>
+  <p class="section-sub">El vendedor ya está incluido según el switch (comisión o socio). Autónomos no figura acá: es gasto personal de cada socio, fuera del resultado de la sociedad.</p>
 
   <div class="grid2">
     <div class="scn rec">
       <div class="scn-head">
-        <div class="scn-name">SRL · 2 socios</div>
+        <div class="scn-name" id="s-name">SRL · 2 socios + vendedor</div>
         <span class="scn-badge badge-g">Estructura elegida</span>
       </div>
       <div class="scn-hero">
         <div class="scn-hero-label">Por socio / mes (en mano)</div>
         <div class="scn-hero-val" id="s-hero">—</div>
-        <div class="scn-hero-sub">honorarios netos de Ganancias y autónomos</div>
+        <div class="scn-hero-sub">honorarios netos de Ganancias personal</div>
       </div>
       <div class="scn-body">
         <div class="scn-line"><span class="l">Facturación</span><span class="v" id="s-rev">—</span></div>
@@ -276,17 +280,18 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
         <div class="scn-line iva"><span class="l" id="s-iva-l">IVA neto a ARCA</span><span class="v" id="s-iva">—</span></div>
         <div class="scn-line neg"><span class="l">IIBB / retenciones</span><span class="v" id="s-iibb">—</span></div>
         <div class="scn-line neg"><span class="l">Contador + balance</span><span class="v" id="s-cont">—</span></div>
-        <div class="scn-line neg"><span class="l">Honorarios (2 socios)</span><span class="v" id="s-hon">—</span></div>
+        <div class="scn-line neg" id="s-vend-row"><span class="l" id="s-vend-l">Comisión vendedor</span><span class="v" id="s-vend">—</span></div>
+        <div class="scn-line neg"><span class="l">Honorarios (2 socios operativos)</span><span class="v" id="s-hon">—</span></div>
         <div style="font-size:11px;color:var(--muted);text-align:right;margin:-4px 0 4px" id="s-hon-eff"></div>
         <div id="s-hon-warn" style="font-size:11px;color:#c0392b;background:#fdecea;border-radius:4px;padding:5px 8px;margin:0 0 6px;display:none"></div>
         <div class="scn-line tot"><span class="l">Ganancia SRL (antes imp.)</span><span class="v" id="s-pre">—</span></div>
         <div class="scn-line neg"><span class="l">Ganancias SRL (escala progresiva)</span><span class="v" id="s-corpgan">—</span></div>
         <div style="font-size:11px;color:var(--muted);text-align:right;margin:-4px 0 4px" id="s-effrate"></div>
         <div class="scn-line tot"><span class="l">Capitaliza en la empresa</span><span class="v" id="s-ret">—</span></div>
-        <div class="scn-line" style="font-size:11px;color:var(--muted)"><span class="l">Autónomos socios (gasto personal, ya restado del bolsillo)</span><span class="v" id="s-auto">—</span></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:4px;text-align:right" id="s-caps"></div>
       </div>
       <div class="scn-foot">
-        <div class="scn-extra">Si distribuís lo capitalizado como dividendos (retención 7%), cada socio suma <strong id="s-div">—</strong>/mes. <strong>Total económico por socio: <span id="s-total">—</span>/mes</strong>.</div>
+        <div class="scn-extra" id="s-foot">—</div>
       </div>
     </div>
 
@@ -467,7 +472,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
     <div class="retiro-head"><div class="retiro-title">1. Honorarios de gerente</div><span class="badge g">El flujo mensual</span></div>
     <div class="retiro-body">
       <p>El socio gerente cobra un monto mensual aprobado en el estatuto o asamblea. Es el mecanismo estándar para tener cash personal continuo. Lo definís vos (el slider del simulador te deja calibrarlo).</p>
-      <p>Son deducibles para la empresa hasta el <strong>25% de la utilidad</strong>; el exceso no deduce (el simulador ya lo refleja). Pagás Ganancias personal sobre lo recibido, con autónomos y deducciones personales restando de la base.</p>
+      <p>Son deducibles para la empresa hasta el <strong>25% de la utilidad</strong>; el exceso no deduce (el simulador ya lo refleja). Pagás Ganancias personal sobre lo recibido, con tus deducciones personales restando de la base. Autónomos es un gasto personal de cada socio (acá no se simula: cada uno lo resuelve según su situación — alguno ya lo paga por otra sociedad).</p>
     </div>
     <ul class="steps">
       <li><span class="step-n">1</span><span class="step-t"><strong>Definir el monto</strong> en el estatuto al constituir la SRL</span></li>
@@ -546,8 +551,8 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 
 <script>
 // ─── Estado ───
-const st={units:20,days:30,price:64900,prodCost:23690,ivaRate:21,mlComision:10273.7,mlShip:7470,cuotasPct:8.4,iibbPct:5,
-autonomos:120000,contadorSRL:200000,honorarios:800000,dedPer:11748804,comPct:2,comAlcance:100,eqPct:15};
+const st={units:20,days:30,price:58900,prodCost:23690,ivaRate:21,mlPct:15.83,mlComision:58900*0.1583,mlShip:7470,cuotasPct:8.4,iibbPct:5,
+contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:2,comAlcance:100,eqPct:15};
 
 // ─── Escalas (ARCA 2025 — actualizar periódicamente) ───
 // Art. 94 Personas Humanas — recibe base imponible ANUAL
@@ -605,11 +610,12 @@ function srlPipe(op){
 }
 
 // ─── Ganancias personal del socio (sobre honorarios) ───
-// Base anual = (honorarios − autónomos) ×12 − deducciones. Bolsillo neto de impuesto Y autónomos.
+// Base anual = honorarios ×12 − deducciones. Autónomos NO se considera acá: es gasto
+// personal de cada socio (puede ya pagarlo por otra sociedad) y no afecta el resultado de la SRL.
 function socioPersonal(){
-  const base=Math.max(0,(st.honorarios-st.autonomos)*12-st.dedPer);
+  const base=Math.max(0,st.honorarios*12-st.dedPer);
   const tax=personalTax(base)/12;
-  const pocket=st.honorarios-tax-st.autonomos;
+  const pocket=st.honorarios-tax;
   const eff=st.honorarios>0?tax/st.honorarios:0;
   return {tax,pocket,eff};
 }
@@ -625,23 +631,29 @@ function calc(){
   const u=unitEcon(st.price,st.prodCost,st.mlComision);
   const U=st.units*st.days, rev=st.price*U;
   const gross=u.net*U;
-  const opBase=gross-st.contadorSRL;
-  const base=srlPipe(opBase);
-  const per=socioPersonal();
-  const divShare=Math.max(0,base.ret)/2*0.93;
-  const socioTotal=per.pocket+divShare;
-  // Tercero — A: comisión
+  const opBase=gross-st.contadorSRL;                  // antes del vendedor
   const com=rev*(st.comAlcance/100)*(st.comPct/100);
+  const isCom=st.vendMode==='com';
+  const eq=st.eqPct/100;
+  // Pipeline del modo elegido (tab 1)
+  const main=srlPipe(opBase-(isCom?com:0));
+  const per=socioPersonal();
+  const ret=Math.max(0,main.ret);
+  const capSocio=isCom?ret/2:ret*(1-eq)/2;            // lo que capitaliza c/socio operativo
+  const capVend=isCom?0:ret*eq;                       // lo que capitaliza el vendedor (modo socio)
+  const divShare=capSocio*0.93;
+  const socioTotal=per.pocket+divShare;
+  // Comparativa A vs B (tab 2) — independiente del switch
   const A=srlPipe(opBase-com);
-  const ahorro=base.corp-A.corp;
+  const noCom=srlPipe(opBase);
+  const ahorro=noCom.corp-A.corp;
   const socioA=per.pocket+Math.max(0,A.ret)/2*0.93;
-  // Tercero — B: socio
-  const eq=st.eqPct/100, retB=Math.max(0,base.ret);
+  const retB=Math.max(0,noCom.ret);
   const terceroB=retB*eq*0.93;
   const socioB=per.pocket+retB*(1-eq)/2*0.93;
   const baseAlc=rev*st.comAlcance/100;
   const comEq=baseAlc>0?terceroB/baseAlc*100:0;
-  return {u,U,rev,gross,opBase,base,per,divShare,socioTotal,com,A,ahorro,socioA,eq,retB,terceroB,socioB,baseAlc,comEq};
+  return {u,U,rev,gross,opBase,com,isCom,eq,main,per,ret,capSocio,capVend,divShare,socioTotal,A,noCom,ahorro,socioA,retB,terceroB,socioB,baseAlc,comEq};
 }
 
 // ─── Helpers UI ───
@@ -666,19 +678,32 @@ function upd(){
   T('h-rev',f(r.rev));T('h-units',r.U+' u · '+st.units+'/día × '+st.days);
 
   // ── Tab 1: SRL card ──
+  const eqTxt=st.eqPct+'%';
+  T('s-name',r.isCom?'SRL · 2 socios + vendedor a comisión':'SRL · 3 socios (vendedor '+eqTxt+')');
   T('s-hero',f(r.per.pocket));
   T('s-rev',f(r.rev));T('s-prod',f(-st.prodCost*r.U));T('s-ml',f(-r.u.mlBlock*r.U));
   const ivaTot=r.u.ivaNet*r.U;
   T('s-iva-l',ivaTot>=0?'IVA neto a ARCA':'IVA: saldo a favor');T('s-iva',f(-ivaTot));
-  T('s-iibb',f(-r.u.iibb*r.U));T('s-cont',f(-st.contadorSRL));T('s-hon',f(-r.base.honTot));
-  T('s-hon-eff','Ganancias personal c/socio: '+f(-r.per.tax)+' · Tasa ef. '+pf(r.per.eff)+' · Autónomos: '+f(-st.autonomos)+' → en mano '+f(r.per.pocket)+'/mes');
+  T('s-iibb',f(-r.u.iibb*r.U));T('s-cont',f(-st.contadorSRL));
+  S('s-vend-row',r.isCom);
+  if(r.isCom){T('s-vend-l','Comisión vendedor ('+st.comPct+'% s/ventas)');T('s-vend',f(-r.com))}
+  T('s-hon',f(-r.main.honTot));
+  T('s-hon-eff',st.honorarios>0?('Ganancias personal c/socio: '+f(-r.per.tax)+' · Tasa ef. '+pf(r.per.eff)+' → en mano '+f(r.per.pocket)+'/mes'):'Sin honorarios: todo el resultado queda en la sociedad.');
   const warn=el('s-hon-warn');
-  if(r.base.exceso>0){warn.style.display='';warn.textContent='⚠ Honorarios exceden el 25% deducible (máx. '+f(r.base.maxDed)+'). El exceso de '+f(r.base.exceso)+' no deduce y ya está sumado a la base de Ganancias de la SRL.'}
+  if(r.main.exceso>0){warn.style.display='';warn.textContent='⚠ Honorarios exceden el 25% deducible (máx. '+f(r.main.maxDed)+'). El exceso de '+f(r.main.exceso)+' no deduce y ya está sumado a la base de Ganancias de la SRL.'}
   else{warn.style.display='none'}
-  T('s-pre',f(r.base.pre));T('s-corpgan',f(-r.base.corp));
-  T('s-effrate','Tasa efectiva: '+pf(r.base.eff)+' · Escala 2025 ARCA · base con exceso de honorarios sumado');
-  T('s-ret',f(r.base.ret));T('s-auto',f(-st.autonomos*2));
-  T('s-div',f(r.divShare));T('s-total',f(r.socioTotal));
+  T('s-pre',f(r.main.pre));T('s-corpgan',f(-r.main.corp));
+  T('s-effrate','Tasa efectiva: '+pf(r.main.eff)+' · Escala 2025 ARCA · base con exceso de honorarios sumado');
+  T('s-ret',f(r.main.ret));
+  if(r.isCom){
+    H('s-caps','Cada socio capitaliza <strong>'+f(r.capSocio)+'</strong>/mes — si lo distribuye como dividendo, deducido el 7%: <strong>'+f(r.capSocio*0.93)+'</strong>/mes.');
+  }else{
+    H('s-caps','Cada socio operativo capitaliza <strong>'+f(r.capSocio)+'</strong>/mes (neto del 7% al distribuir: <strong>'+f(r.capSocio*0.93)+'</strong>) · Vendedor ('+eqTxt+'): '+f(r.capVend)+'/mes (neto 7%: '+f(r.capVend*0.93)+').');
+  }
+  H('s-foot',(r.isCom
+    ?'Modo <strong>comisión</strong>: el vendedor cobra <strong>'+f(r.com)+'</strong>/mes contra factura (gasto deducible). '
+    :'Modo <strong>socio</strong>: el vendedor participa con el '+eqTxt+' de lo capitalizado, vía dividendos. ')
+    +'Total económico por socio operativo (honorarios en mano + capitalización neta de 7%): <strong>'+f(r.socioTotal)+'</strong>/mes. Autónomos de cada socio es un gasto personal y se paga de este bolsillo.');
 
   // ── Tab 1: por unidad + IVA ──
   T('u-title','Detalle por unidad — costo '+f(st.prodCost)+' · venta '+f(st.price));
@@ -719,26 +744,35 @@ function upd(){
   else v+='Para los socios operativos conviene darle participación: '+f(r.socioB)+' vs '+f(r.socioA)+' por socio/mes.';
   T('cmp-verdict',v);
 
+  // ── sync sliders vendedor (tab 1 ↔ tab 2) ──
+  ['sl-com1','sl-com'].forEach(id=>{const e=el(id);if(e)e.value=st.comPct});
+  ['v-com1','v-com'].forEach(id=>T(id,st.comPct+'%'));
+  ['sl-eq1','sl-eq'].forEach(id=>{const e=el(id);if(e)e.value=st.eqPct});
+  ['v-eq1','v-eq'].forEach(id=>T(id,st.eqPct+'%'));
+
   // ── Tab 3: sensibilidad ──
+  const comFactor=r.isCom?(st.comAlcance/100)*(st.comPct/100):0;   // comisión por $ de venta
+  const capShare=r.isCom?0.5:(1-r.eq)/2;                            // parte de cada socio operativo
   const mlPct=st.price>0?st.mlComision/st.price:0;
-  const bePrice=bisect(P=>unitEcon(P,st.prodCost,P*mlPct).net,1,Math.max(st.price*5,10000));
+  const bePrice=bisect(P=>unitEcon(P,st.prodCost,P*mlPct).net-P*comFactor,1,Math.max(st.price*5,10000));
   if(bePrice!=null){
     T('be-price',f(bePrice));
     const room=st.price>0?(st.price-bePrice)/st.price*100:0;
     T('be-price-sub',room>=0?'Colchón vs precio actual: '+room.toFixed(1)+'% de baja aguanta':'⚠ Ya estás '+Math.abs(room).toFixed(1)+'% por debajo del equilibrio');
   }else{T('be-price','—');T('be-price-sub','Sin equilibrio en el rango analizado')}
-  const beCost=bisect(c=>unitEcon(st.price,c,st.mlComision).net,0,st.price*2);
+  const beCost=bisect(c=>unitEcon(st.price,c,st.mlComision).net-st.price*comFactor,0,st.price*2);
   if(beCost!=null){
     T('be-cost',f(beCost));
     const roomC=st.prodCost>0?(beCost-st.prodCost)/st.prodCost*100:0;
     T('be-cost-sub',roomC>=0?'Aguanta un aumento de hasta '+roomC.toFixed(1)+'% del proveedor':'⚠ El costo actual ya supera el máximo viable');
   }else{T('be-cost','—');T('be-cost-sub','Sin equilibrio en el rango analizado')}
   const r0=calc();
-  if(r0.u.net>0){
-    const beFull=(st.contadorSRL+st.honorarios*2)/(r0.u.net*st.days);
-    const beStruct=st.contadorSRL/(r0.u.net*st.days);
+  const netEff=r0.u.net-st.price*comFactor;   // margen unitario después de comisión vendedor
+  if(netEff>0){
+    const beFull=(st.contadorSRL+st.honorarios*2)/(netEff*st.days);
+    const beStruct=st.contadorSRL/(netEff*st.days);
     T('be-units',beFull.toFixed(1)+' u/día');
-    T('be-units-sub','Para cubrir estructura + honorarios de ambos socios. Solo estructura (sin honorarios): '+beStruct.toFixed(1)+' u/día. Actual: '+st.units+' u/día.');
+    T('be-units-sub','Para cubrir estructura + honorarios de ambos socios'+(comFactor>0?' (comisión del vendedor ya descontada del margen)':'')+'. Solo estructura (sin honorarios): '+beStruct.toFixed(1)+' u/día. Actual: '+st.units+' u/día.');
   }else{T('be-units','—');T('be-units-sub','El margen unitario es negativo: no hay volumen que cierre los números.')}
 
   // tabla precio
@@ -746,9 +780,9 @@ function upd(){
     [-0.15,-0.10,-0.05,0,0.05,0.10].forEach(d=>{
       const P=st.price*(1+d), mlc=P*mlPct;
       const ue=unitEcon(P,st.prodCost,mlc);
-      const op=ue.net*r.U-st.contadorSRL;
+      const op=ue.net*r.U-st.contadorSRL-P*r.U*comFactor;
       const pp=srlPipe(op);
-      const socio=r.per.pocket+Math.max(0,pp.ret)/2*0.93;
+      const socio=r.per.pocket+Math.max(0,pp.ret)*capShare*0.93;
       const cls=d===0?' class="base"':'';
       const mNeg=ue.net<0?' class="neg"':'';
       h+='<tr'+cls+'><td>'+(d>0?'+':'')+(d*100).toFixed(0)+'%</td><td>'+f(P)+'</td><td'+mNeg+'>'+f(ue.net)+'</td><td'+mNeg+'>'+(P>0?pf(ue.net/P):'—')+'</td><td'+(pp.pre<0?' class="neg"':'')+'>'+f(pp.pre)+'</td><td>'+f(socio)+'</td></tr>';
@@ -758,9 +792,9 @@ function upd(){
     [-0.10,0,0.10,0.20,0.30].forEach(d=>{
       const pc=st.prodCost*(1+d);
       const ue=unitEcon(st.price,pc,st.mlComision);
-      const op=ue.net*r.U-st.contadorSRL;
+      const op=ue.net*r.U-st.contadorSRL-st.price*r.U*comFactor;
       const pp=srlPipe(op);
-      const socio=r.per.pocket+Math.max(0,pp.ret)/2*0.93;
+      const socio=r.per.pocket+Math.max(0,pp.ret)*capShare*0.93;
       const cls=d===0?' class="base"':'';
       const mNeg=ue.net<0?' class="neg"':'';
       h+='<tr'+cls+'><td>'+(d>0?'+':'')+(d*100).toFixed(0)+'%</td><td>'+f(pc)+'</td><td'+mNeg+'>'+f(ue.net)+'</td><td'+mNeg+'>'+(st.price>0?pf(ue.net/st.price):'—')+'</td><td'+(pp.pre<0?' class="neg"':'')+'>'+f(pp.pre)+'</td><td>'+f(socio)+'</td></tr>';
@@ -770,6 +804,7 @@ function upd(){
 function sv(k,v,vid,cur){st[k]=Number(v);const e=el(vid);if(e)e.textContent=cur?f(Number(v)):v;upd()}
 function svp(k,v,vid){st[k]=Number(v);const e=el(vid);if(e)e.textContent=v+'%';upd()}
 function ivaMode(t){st.ivaRate=t;A2('b-iva21',t===21);A2('b-iva105',t===10.5);upd()}
+function vendMode(m){st.vendMode=m;A2('b-vcom',m==='com');A2('b-vsoc',m==='soc');S('g-vcom',m==='com');S('g-vsoc',m==='soc');upd()}
 function tab(id,i){
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
