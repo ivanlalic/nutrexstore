@@ -306,6 +306,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
           <tr id="u-cuo-row"><td class="name">Costo cuotas sin interés</td><td class="val" id="u-cuo">—</td></tr>
           <tr><td class="name">Envío ML</td><td class="val" id="u-ship">—</td></tr>
           <tr><td class="name" id="u-iibb-l">IIBB / retenciones</td><td class="val" id="u-iibb">—</td></tr>
+          <tr id="u-vend-row"><td class="name" id="u-vend-l">Comisión vendedor</td><td class="val" id="u-vend">—</td></tr>
           <tr class="iva"><td class="name" id="u-iva-l">IVA neto a ARCA</td><td class="val" id="u-iva">—</td></tr>
           <tr class="profit"><td class="name">Ganancia por unidad</td><td class="val" id="u-net">—</td></tr>
         </table>
@@ -467,7 +468,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 <!-- ════ TAB CAJA: FLUJO DE CAJA ════ -->
 <div id="pane-caja" class="pane">
   <h2 class="section-h">Flujo de caja — los primeros 180 días</h2>
-  <p class="section-sub">Simulación diaria con los plazos reales: ML acredita el neto (ya descontados comisión, envío, cuotas y retenciones) unos días después de la entrega; al laboratorio se le paga a plazo. Usa el precio, costos y modo de vendedor del tab Simulador.</p>
+  <p class="section-sub">Simulación diaria con los plazos reales: ML acredita el neto (ya descontados comisión, envío, cuotas y retenciones) unos días después de la entrega; al laboratorio se le paga con una factura mensual consolidada, a plazo desde el cierre del mes. Usa el precio, costos y modo de vendedor del tab Simulador.</p>
 
   <div class="inputs">
     <div class="inputs-grid">
@@ -478,14 +479,13 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
         <div class="hint">Total venta → plata en MP: <strong id="v-lagtot">11</strong> días. Si ML te paga "a 14 de lo entregado", subí el segundo slider a 14.</div>
       </div>
       <div>
-        <div class="ig-title">Plazos de pago y stock</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Pago al laboratorio (días)</span><span class="sl-val" id="v-dlab">30</span></div><input type="range" id="sl-dlab" min="0" max="90" step="5" value="30" oninput="sv('dPagoLab',this.value,'v-dlab',0)"></div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Stock objetivo (días de venta)</span><span class="sl-val" id="v-dstk">15</span></div><input type="range" id="sl-dstk" min="3" max="60" value="15" oninput="sv('dStock',this.value,'v-dstk',0)"></div>
-        <div class="hint">El stock inicial se compra el día 0 y se paga al plazo del laboratorio. Después se repone lo vendido cada día.</div>
+        <div class="ig-title">Plazos de pago</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Pago al laboratorio (días desde el cierre del mes)</span><span class="sl-val" id="v-dlab">0</span></div><input type="range" id="sl-dlab" min="0" max="90" step="5" value="0" oninput="sv('dPagoLab',this.value,'v-dlab',0)"><div class="hint">0 = la factura vence el día 1 del mes siguiente, cuando llega la entrega nueva. Subilo si negociás días extra.</div></div>
+        <div class="hint">El laboratorio entrega el día 1 de cada mes lo que se vende ese mes (con 20 u/día: 600 unidades). No hay stock buffer aparte.</div>
       </div>
       <div>
         <div class="ig-title">Arranque</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Capital inicial aportado</span><span class="sl-val" id="v-capini">$3.000.000</span></div><input type="range" id="sl-capini" min="0" max="30000000" step="500000" value="3000000" oninput="sv('capIni',this.value,'v-capini',1)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Capital inicial aportado</span><span class="sl-val" id="v-capini">$0</span></div><input type="range" id="sl-capini" min="0" max="30000000" step="500000" value="0" oninput="sv('capIni',this.value,'v-capini',1)"></div>
         <div class="sl-group"><div class="sl-row"><span class="sl-label">Rampa hasta régimen (días)</span><span class="sl-val" id="v-ramp">0</span></div><input type="range" id="sl-ramp" min="0" max="60" step="5" value="0" oninput="sv('ramp',this.value,'v-ramp',0)"></div>
         <div class="hint">0 = vendés a pleno desde el día 1 (ya estás validado). Con rampa, las ventas suben linealmente hasta las unidades/día del simulador.</div>
       </div>
@@ -519,10 +519,10 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
   <div class="card">
     <div class="card-title">Detalle semanal (primeras 12 semanas)</div>
     <table class="comp-table" style="margin-bottom:8px">
-      <thead><tr><th>Semana</th><th>Ventas (u)</th><th>Cobros ML</th><th>Pagos producto</th><th>Fijos + impuestos</th><th>Caja al cierre</th></tr></thead>
+      <thead><tr><th>Semana</th><th>Ventas (u)</th><th>Cobros ML</th><th>Pagos producto</th><th>Comisión vend.</th><th>Fijos + impuestos</th><th>Caja al cierre</th></tr></thead>
       <tbody id="cash-week-body"></tbody>
     </table>
-    <p style="font-size:11px;color:var(--muted)">Cobros = neto que acredita MP. Pagos producto = facturas del laboratorio que vencen esa semana (IVA incluido). Fijos + impuestos = contador, honorarios, IVA del mes anterior y comisión del vendedor si corresponde.</p>
+    <p style="font-size:11px;color:var(--muted)">Cobros = neto que acredita MP. Pagos producto = factura mensual del laboratorio si vence esa semana (la entrega del mes, IVA incluido). Comisión vend. = se paga contra factura a los 10 días del cierre de cada mes (solo en modo comisión). Fijos + impuestos = contador, honorarios e IVA del mes anterior.</p>
   </div>
 
   <div class="warn-box blue">
@@ -625,7 +625,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 // ─── Estado ───
 const st={units:20,days:30,price:58900,prodCost:23690,ivaRate:21,mlPct:15.83,mlComision:58900*0.1583,mlShip:7470,cuotasPct:8.4,iibbPct:5,
 contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:2,comAlcance:100,eqPct:15,
-capIni:3000000,dEnt:3,dAcr:8,dPagoLab:30,dStock:15,ramp:0};
+capIni:0,dEnt:3,dAcr:8,dPagoLab:0,ramp:0};
 
 // ─── Escalas (ARCA 2025 — actualizar periódicamente) ───
 // Art. 94 Personas Humanas — recibe base imponible ANUAL
@@ -731,7 +731,9 @@ function calc(){
 
 // ─── Flujo de caja diario (180 días) ───
 // Cobro: ML acredita el NETO (precio − comisión − envío − cuotas − retención IIBB)
-// a los dEnt+dAcr días de la venta. Pago: laboratorio a dPagoLab días, IVA incluido.
+// a los dEnt+dAcr días de la venta. Compra: el laboratorio ENTREGA una vez por mes
+// (el día 1, lo que se vende ese mes) y su factura se paga a dPagoLab días del
+// cierre del mes (0 = el día 1 del mes siguiente, junto con la entrega nueva).
 // IVA neto del mes se paga el día 20 del mes siguiente. Fijos a fin de mes.
 function cashSim(){
   const u=unitEcon(st.price,st.prodCost,st.mlComision);
@@ -739,41 +741,66 @@ function cashSim(){
   const costB=st.prodCost*(1+st.ivaRate/100);          // lo que sale de caja por unidad comprada
   const netCred=st.price-u.mlBlock-u.iibb;             // lo que acredita MP por unidad
   const isCom=st.vendMode==='com';
-  const sales=new Array(D).fill(0), inMl=new Array(D).fill(0), outProd=new Array(D).fill(0), outFix=new Array(D).fill(0);
+  const sales=new Array(D).fill(0), inMl=new Array(D).fill(0), outProd=new Array(D).fill(0), outFix=new Array(D).fill(0), outCom=new Array(D).fill(0);
   for(let d=0;d<D;d++) sales[d]=(st.ramp>0&&d<st.ramp)?st.units*(d+1)/st.ramp:st.units;
   // cobros ML
   for(let d=0;d<D;d++){const cd=d+lag;if(cd<D)inMl[cd]+=sales[d]*netCred}
-  // compra inicial de stock (día 0, pagada a plazo) + reposición diaria de lo vendido
-  const stock0=st.dStock*st.units;
-  if(st.dPagoLab<D)outProd[st.dPagoLab]+=stock0*costB;else outProd[D-1]+=stock0*costB;
-  for(let d=0;d<D;d++){const pd=d+st.dPagoLab;if(pd<D)outProd[pd]+=sales[d]*costB}
+  // entregas mensuales: cada mes llega lo que se vende ese mes; la factura vence
+  // a dPagoLab días del cierre de ese mes
+  let firstInv=0,firstU=0;
+  for(let m=0;m*30<D;m++){
+    let tu=0;for(let d=m*30;d<Math.min((m+1)*30,D);d++)tu+=sales[d];
+    const inv=tu*costB;
+    if(m===0){firstInv=inv;firstU=tu}
+    const pd=(m+1)*30+st.dPagoLab;
+    if(pd<D)outProd[pd]+=inv;
+  }
+  const firstInvD=30+st.dPagoLab;
   // mensuales
   for(let mEnd=30;mEnd<=D+30;mEnd+=30){
     let su=0;for(let d=mEnd-30;d<Math.min(mEnd,D);d++)su+=sales[d];
     if(mEnd-1<D)outFix[mEnd-1]+=st.contadorSRL+st.honorarios*2;
     const ivaD=mEnd+20, iva=su*u.ivaNet;
     if(ivaD<D&&iva>0)outFix[ivaD]+=iva;
-    if(isCom){const cd=mEnd+10;if(cd<D)outFix[cd]+=su*st.price*(st.comAlcance/100)*(st.comPct/100)}
+    if(isCom){const cd=mEnd+10;if(cd<D)outCom[cd]+=su*st.price*(st.comAlcance/100)*(st.comPct/100)}
   }
   // serie acumulada
   let c=st.capIni,min=c,minD=0;const serie=[c];
-  for(let d=0;d<D;d++){c+=inMl[d]-outProd[d]-outFix[d];serie.push(c);if(c<min){min=c;minD=d+1}}
-  // capital de trabajo en régimen y ciclo
-  const cxc=lag*st.units*netCred, inv=st.dStock*st.units*costB, cxp=st.dPagoLab*st.units*costB;
-  return {serie,min,minD,fin:c,cxc,inv,cxp,wc:cxc+inv-cxp,ccc:st.dStock+lag-st.dPagoLab,lag,netCred,costB,D,sales,inMl,outProd,outFix};
+  for(let d=0;d<D;d++){c+=inMl[d]-outProd[d]-outFix[d]-outCom[d];serie.push(c);if(c<min){min=c;minD=d+1}}
+  // retirable: máximo que se puede sacar el día X sin que la caja futura baje de cero
+  const fwdMin=new Array(serie.length);let fm=Infinity;
+  for(let i=serie.length-1;i>=0;i--){fm=Math.min(fm,serie[i]);fwdMin[i]=fm}
+  let retDay=-1;for(let i=0;i<fwdMin.length;i++){if(fwdMin[i]>0){retDay=i;break}}
+  // capital de trabajo en régimen y ciclo:
+  // inventario promedio = medio mes (la entrega se consume durante el mes);
+  // deuda con el laboratorio = cada entrega se debe 30+dPagoLab días
+  const payAvg=30+st.dPagoLab, invDays=15;
+  const cxc=lag*st.units*netCred, inv=invDays*st.units*costB, cxp=payAvg*st.units*costB;
+  return {serie,min,minD,fin:c,cxc,inv,cxp,wc:cxc+inv-cxp,ccc:invDays+lag-payAvg,payAvg,invDays,firstInv,firstU,firstInvD,lag,netCred,costB,D,sales,inMl,outProd,outFix,outCom,fwdMin,retDay};
 }
 function cashChart(cs){
-  const w=920,h=240,pl=14,pr=14,pt=12,pb=26;
+  const w=920,h=240,pl=64,pr=14,pt=12,pb=26;
   const mx=Math.max(...cs.serie),mn=Math.min(...cs.serie,0),rng=(mx-mn)||1;
   const X=i=>pl+(w-pl-pr)*i/cs.D, Y=v=>pt+(h-pt-pb)*(1-(v-mn)/rng);
   let pts='';cs.serie.forEach((v,i)=>{pts+=X(i).toFixed(1)+','+Y(v).toFixed(1)+' '});
   const z=Y(0);
   let g='';
   for(let d=0;d<=cs.D;d+=30)g+='<line x1="'+X(d)+'" y1="'+pt+'" x2="'+X(d)+'" y2="'+(h-pb)+'" stroke="#E0DED8" stroke-width="1"/><text x="'+X(d)+'" y="'+(h-8)+'" font-size="10" fill="#636366" text-anchor="middle">d'+d+'</text>';
+  // eje Y: ticks redondeados en plata
+  const step=niceStep(rng/4);
+  for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step){
+    const y=Y(v);
+    g+='<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(w-pr)+'" y2="'+y.toFixed(1)+'" stroke="#ECEAE4" stroke-width="1"/><text x="'+(pl-6)+'" y="'+(y+3.5).toFixed(1)+'" font-size="10" fill="#636366" text-anchor="end">'+f(v)+'</text>';
+  }
   const minPt='<circle cx="'+X(cs.minD)+'" cy="'+Y(cs.min)+'" r="4" fill="'+(cs.min<0?'#C93535':'#B86800')+'"/>';
   return '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;display:block">'+g+
     '<line x1="'+pl+'" y1="'+z+'" x2="'+(w-pr)+'" y2="'+z+'" stroke="#C93535" stroke-dasharray="4 3" stroke-width="1"/>'+
     '<polyline fill="none" stroke="#1A5FAD" stroke-width="2.5" points="'+pts+'"/>'+minPt+'</svg>';
+}
+function niceStep(raw){
+  const p=Math.pow(10,Math.floor(Math.log10(raw||1)));
+  const n=raw/p;
+  return (n<=1?1:n<=2?2:n<=5?5:10)*p;
 }
 
 // ─── Helpers UI ───
@@ -831,9 +858,12 @@ function upd(){
   T('u-cuo',f(-r.u.cuo));S('u-cuo-row',r.u.cuo>0);
   T('u-ship',f(-st.mlShip));
   T('u-iibb-l','IIBB / retenciones ('+st.iibbPct+'%)');T('u-iibb',f(-r.u.iibb));
+  const comU=r.isCom?st.price*(st.comAlcance/100)*(st.comPct/100):0;
+  S('u-vend-row',r.isCom);
+  if(r.isCom){T('u-vend-l','Comisión vendedor ('+st.comPct+'%'+(st.comAlcance<100?' s/ '+st.comAlcance+'% de la fact.':'')+')');T('u-vend',f(-comU))}
   T('u-iva-l',r.u.ivaNet>=0?'IVA neto a ARCA':'IVA: saldo a favor');T('u-iva',f(-r.u.ivaNet));
-  T('u-net',f(r.u.net));
-  T('u-margin','Margen neto por unidad: '+(st.price>0?pf(r.u.net/st.price):'—')+'. Los costos fijos, honorarios e impuestos sobre la ganancia se aplican sobre el total mensual.');
+  T('u-net',f(r.u.net-comU));
+  T('u-margin','Margen neto por unidad: '+(st.price>0?pf((r.u.net-comU)/st.price):'—')+'. '+(r.isCom?'':'En modo socio el vendedor no es un costo por unidad: participa de la ganancia vía dividendos. ')+'Los costos fijos, honorarios e impuestos sobre la ganancia se aplican sobre el total mensual.');
   T('iva-deb-l','IVA cobrado en la venta (débito, '+st.ivaRate+'%)');
   T('iva-deb',f(r.u.deb));
   T('iva-cp',f(-r.u.credP));T('iva-cm',f(-r.u.credM));T('iva-ce',f(-r.u.credE));
@@ -925,8 +955,8 @@ function upd(){
   T('v-lagtot',cs.lag);
   T('k-ccc',cs.ccc+' días');
   T('k-ccc-sub',cs.ccc<0
-    ?'Stock '+st.dStock+' + cobro '+cs.lag+' − pago lab '+st.dPagoLab+'. Negativo: cobrás '+Math.abs(cs.ccc)+' días ANTES de pagar — el laboratorio financia la operación.'
-    :'Stock '+st.dStock+' + cobro '+cs.lag+' − pago lab '+st.dPagoLab+'. Positivo: tenés que financiar '+cs.ccc+' días de operación con caja propia.');
+    ?'Stock '+cs.invDays+' prom (entrega mensual) + cobro '+cs.lag+' − pago lab '+cs.payAvg+' (entrega día 1, factura a '+st.dPagoLab+' días del cierre). Negativo: en régimen cobrás '+Math.abs(cs.ccc)+' días ANTES de pagar.'
+    :'Stock '+cs.invDays+' prom (entrega mensual) + cobro '+cs.lag+' − pago lab '+cs.payAvg+' (entrega día 1, factura a '+st.dPagoLab+' días del cierre). Positivo: tenés que financiar '+cs.ccc+' días de operación con caja propia.');
   T('k-min',f(cs.min));
   T('k-min-sub',cs.min<0
     ?'⚠ Día '+cs.minD+'. La caja se va a rojo: falta capital inicial por al menos '+f(-cs.min)+' (o renegociar plazos).'
@@ -937,15 +967,18 @@ function upd(){
   T('cash-chart-note','Azul: caja acumulada (arranca en el capital inicial de '+f(st.capIni)+'). Línea roja punteada: cero. Punto marcado: caja mínima ('+f(cs.min)+', día '+cs.minD+'). Caja al día 180: '+f(cs.fin)+'.');
   const tbW=el('cash-week-body');if(tbW){let h2='';
     for(let wk=0;wk<12;wk++){
-      let su=0,ci=0,cp=0,cf=0;
-      for(let d=wk*7;d<Math.min((wk+1)*7,cs.D);d++){su+=cs.sales[d];ci+=cs.inMl[d];cp+=cs.outProd[d];cf+=cs.outFix[d]}
+      let su=0,ci=0,cp=0,cf=0,cc=0;
+      for(let d=wk*7;d<Math.min((wk+1)*7,cs.D);d++){su+=cs.sales[d];ci+=cs.inMl[d];cp+=cs.outProd[d];cf+=cs.outFix[d];cc+=cs.outCom[d]}
       const cierre=cs.serie[Math.min((wk+1)*7,cs.D)];
-      h2+='<tr><td>S'+(wk+1)+'</td><td>'+Math.round(su)+'</td><td class="pos">'+f(ci)+'</td><td'+(cp>0?' class="neg"':'')+'>'+f(-cp)+'</td><td'+(cf>0?' class="neg"':'')+'>'+f(-cf)+'</td><td'+(cierre<0?' class="neg"':'')+'>'+f(cierre)+'</td></tr>';
+      h2+='<tr><td>S'+(wk+1)+'</td><td>'+Math.round(su)+'</td><td class="pos">'+f(ci)+'</td><td'+(cp>0?' class="neg"':'')+'>'+f(-cp)+'</td><td'+(cc>0?' class="neg"':'')+'>'+(cc>0?f(-cc):'—')+'</td><td'+(cf>0?' class="neg"':'')+'>'+f(-cf)+'</td><td'+(cierre<0?' class="neg"':'')+'>'+f(cierre)+'</td></tr>';
     }tbW.innerHTML=h2}
-  let nar='Cada venta te acredita '+f(cs.netCred)+' netos en MP a los '+cs.lag+' días; cada unidad comprada te cuesta '+f(cs.costB)+' (IVA incluido) pagaderos a '+st.dPagoLab+' días. ';
+  let nar='Cada venta te acredita '+f(cs.netCred)+' netos en MP a los '+cs.lag+' días. El laboratorio entrega el día 1 de cada mes ('+Math.round(cs.firstU)+' u el primer mes) y esa factura ('+f(cs.firstInv)+') vence el día '+cs.firstInvD+(st.dPagoLab===0?' — justo cuando llega la entrega siguiente':'')+'. ';
   if(cs.ccc<0)nar+='Con estos plazos la plata de las ventas llega antes que el vencimiento del laboratorio: el negocio se autofinancia y crecer en volumen GENERA caja en vez de consumirla. El riesgo está en lo inverso — si el laboratorio te pasa a contado o ML estira la acreditación, el ciclo se da vuelta. ';
   else nar+='Con estos plazos tenés que poner plata propia para sostener la operación: cada peso de crecimiento consume caja. Negociar más plazo con el laboratorio es la palanca más directa. ';
-  nar+='El primer vencimiento grande es el stock inicial ('+Math.round(st.dStock*st.units)+' u = '+f(st.dStock*st.units*cs.costB)+') el día '+st.dPagoLab+' — para entonces ya cobraste '+Math.max(0,st.dPagoLab-cs.lag)+' días de ventas.';
+  nar+='Al vencimiento de cada factura llevás cobrados solo '+Math.max(0,30-cs.lag)+' de los 30 días del mes (por el lag de ML): ese descalce de '+cs.lag+' días de ventas es el agujero estructural de cada cierre de mes. ';
+  if(cs.retDay<0)nar+='Retiros: con estos plazos la caja nunca queda en positivo de forma segura dentro de los 180 días — no hay margen para retirar nada.';
+  else if(cs.retDay===0)nar+='Retiros: desde el día 1 se podría retirar hasta '+f(cs.fwdMin[0])+' sin comprometer ningún vencimiento futuro; ese margen crece a medida que pasan los meses.';
+  else nar+='Retiros: hasta el día '+cs.retDay+' no se puede sacar nada sin mandar la caja a rojo en algún vencimiento. Desde ahí, el retiro seguro arranca en '+f(cs.fwdMin[cs.retDay])+' y se libera más con cada mes que cierra (al día 90: '+f(cs.fwdMin[90])+' · al día 150: '+f(cs.fwdMin[150])+').';
   T('cash-narrative',nar);
 }
 
