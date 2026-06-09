@@ -243,8 +243,8 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
         <div class="sl-group"><div class="sl-row"><span class="sl-label">Contador + balance (SRL)</span><span class="sl-val" id="v-cont">$200.000</span></div><input type="range" id="sl-cont" min="0" max="600000" step="10000" value="200000" oninput="sv('contadorSRL',this.value,'v-cont',1)"></div>
         <div class="ig-title" style="margin-top:14px">Vendedor</div>
         <div class="tog"><button class="tog-btn active" id="b-vcom" onclick="vendMode('com')">Comisión %</button><button class="tog-btn" id="b-vsoc" onclick="vendMode('soc')">Socio</button></div>
-        <div class="sl-group" id="g-vcom"><div class="sl-row"><span class="sl-label">Comisión sobre ventas</span><span class="sl-val" id="v-com1">2%</span></div><input type="range" id="sl-com1" min="0" max="6" step="0.25" value="2" oninput="svp('comPct',this.value,'v-com1')"></div>
-        <div class="sl-group" id="g-vsoc" style="display:none"><div class="sl-row"><span class="sl-label">Participación societaria</span><span class="sl-val" id="v-eq1">15%</span></div><input type="range" id="sl-eq1" min="5" max="35" step="1" value="15" oninput="svp('eqPct',this.value,'v-eq1')"></div>
+        <div class="sl-group" id="g-vcom"><div class="sl-row"><span class="sl-label">Comisión sobre ventas</span><span class="sl-val" id="v-com1">1.5%</span></div><input type="range" id="sl-com1" min="0" max="6" step="0.25" value="1.5" oninput="svp('comPct',this.value,'v-com1')"></div>
+        <div class="sl-group" id="g-vsoc" style="display:none"><div class="sl-row"><span class="sl-label">Participación societaria</span><span class="sl-val" id="v-eq1">33%</span></div><input type="range" id="sl-eq1" min="5" max="35" step="1" value="33" oninput="svp('eqPct',this.value,'v-eq1')"></div>
         <div class="hint">El switch cambia el resultado de abajo. La comparación detallada de las dos alternativas sigue en el tab "Tercero".</div>
       </div>
       <div>
@@ -338,13 +338,13 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
     <div class="inputs-grid">
       <div>
         <div class="ig-title">Alternativa A — Comisión</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Comisión sobre ventas</span><span class="sl-val" id="v-com">2%</span></div><input type="range" id="sl-com" min="0" max="6" step="0.25" value="2" oninput="svp('comPct',this.value,'v-com')"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Comisión sobre ventas</span><span class="sl-val" id="v-com">1.5%</span></div><input type="range" id="sl-com" min="0" max="6" step="0.25" value="1.5" oninput="svp('comPct',this.value,'v-com')"></div>
         <div class="sl-group"><div class="sl-row"><span class="sl-label">Alcance (% de la facturación)</span><span class="sl-val" id="v-alc">100%</span></div><input type="range" id="sl-alc" min="10" max="100" step="5" value="100" oninput="svp('comAlcance',this.value,'v-alc')"></div>
         <div class="hint">Alcance = sobre qué parte de las ventas aplica: solo los productos que él trae, o todo. Es la palanca para que no se coma el margen.</div>
       </div>
       <div>
         <div class="ig-title">Alternativa B — Socio</div>
-        <div class="sl-group"><div class="sl-row"><span class="sl-label">Participación societaria</span><span class="sl-val" id="v-eq">15%</span></div><input type="range" id="sl-eq" min="5" max="35" step="1" value="15" oninput="svp('eqPct',this.value,'v-eq')"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Participación societaria</span><span class="sl-val" id="v-eq">33%</span></div><input type="range" id="sl-eq" min="5" max="35" step="1" value="33" oninput="svp('eqPct',this.value,'v-eq')"></div>
         <div class="hint">El resto se reparte 50/50 entre los 2 socios operativos. Los honorarios siguen siendo solo de los socios que trabajan (él no puede figurar ni facturar gestión).</div>
       </div>
       <div>
@@ -624,7 +624,7 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 <script>
 // ─── Estado ───
 const st={units:20,days:30,price:58900,prodCost:23690,ivaRate:21,mlPct:15.83,mlComision:58900*0.1583,mlShip:7470,cuotasPct:8.4,iibbPct:5,
-contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:2,comAlcance:100,eqPct:15,
+contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:1.5,comAlcance:100,eqPct:33,
 capIni:0,dEnt:3,dAcr:8,dPagoLab:0,ramp:0};
 
 // ─── Escalas (ARCA 2025 — actualizar periódicamente) ───
