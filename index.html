@@ -182,8 +182,9 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
   <button class="tab-btn active" onclick="tab('sim',0)">Simulador</button>
   <button class="tab-btn" onclick="tab('ter',1)">Tercero: ¿Socio o Comisión?</button>
   <button class="tab-btn" onclick="tab('sen',2)">Sensibilidad</button>
-  <button class="tab-btn" onclick="tab('ret',3)">Retirar Utilidades</button>
-  <button class="tab-btn" onclick="tab('obl',4)">Obligaciones</button>
+  <button class="tab-btn" onclick="tab('caja',3)">Flujo de Caja</button>
+  <button class="tab-btn" onclick="tab('ret',4)">Retirar Utilidades</button>
+  <button class="tab-btn" onclick="tab('obl',5)">Obligaciones</button>
 </div>
 
 <!-- ════ TAB 1: SIMULADOR ════ -->
@@ -463,6 +464,77 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
   </div>
 </div>
 
+<!-- ════ TAB CAJA: FLUJO DE CAJA ════ -->
+<div id="pane-caja" class="pane">
+  <h2 class="section-h">Flujo de caja — los primeros 180 días</h2>
+  <p class="section-sub">Simulación diaria con los plazos reales: ML acredita el neto (ya descontados comisión, envío, cuotas y retenciones) unos días después de la entrega; al laboratorio se le paga a plazo. Usa el precio, costos y modo de vendedor del tab Simulador.</p>
+
+  <div class="inputs">
+    <div class="inputs-grid">
+      <div>
+        <div class="ig-title">Plazos de cobro (ML)</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Venta → entrega (días)</span><span class="sl-val" id="v-dent">3</span></div><input type="range" id="sl-dent" min="1" max="10" value="3" oninput="sv('dEnt',this.value,'v-dent',0)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Entrega → acreditación MP (días)</span><span class="sl-val" id="v-dacr">8</span></div><input type="range" id="sl-dacr" min="0" max="21" value="8" oninput="sv('dAcr',this.value,'v-dacr',0)"></div>
+        <div class="hint">Total venta → plata en MP: <strong id="v-lagtot">11</strong> días. Si ML te paga "a 14 de lo entregado", subí el segundo slider a 14.</div>
+      </div>
+      <div>
+        <div class="ig-title">Plazos de pago y stock</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Pago al laboratorio (días)</span><span class="sl-val" id="v-dlab">30</span></div><input type="range" id="sl-dlab" min="0" max="90" step="5" value="30" oninput="sv('dPagoLab',this.value,'v-dlab',0)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Stock objetivo (días de venta)</span><span class="sl-val" id="v-dstk">15</span></div><input type="range" id="sl-dstk" min="3" max="60" value="15" oninput="sv('dStock',this.value,'v-dstk',0)"></div>
+        <div class="hint">El stock inicial se compra el día 0 y se paga al plazo del laboratorio. Después se repone lo vendido cada día.</div>
+      </div>
+      <div>
+        <div class="ig-title">Arranque</div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Capital inicial aportado</span><span class="sl-val" id="v-capini">$3.000.000</span></div><input type="range" id="sl-capini" min="0" max="30000000" step="500000" value="3000000" oninput="sv('capIni',this.value,'v-capini',1)"></div>
+        <div class="sl-group"><div class="sl-row"><span class="sl-label">Rampa hasta régimen (días)</span><span class="sl-val" id="v-ramp">0</span></div><input type="range" id="sl-ramp" min="0" max="60" step="5" value="0" oninput="sv('ramp',this.value,'v-ramp',0)"></div>
+        <div class="hint">0 = vendés a pleno desde el día 1 (ya estás validado). Con rampa, las ventas suben linealmente hasta las unidades/día del simulador.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi3">
+    <div class="kpi">
+      <div class="kpi-label">Ciclo de conversión de caja</div>
+      <div class="kpi-val" id="k-ccc">—</div>
+      <div class="kpi-sub" id="k-ccc-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Caja mínima en 180 días</div>
+      <div class="kpi-val" id="k-min">—</div>
+      <div class="kpi-sub" id="k-min-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Capital de trabajo en régimen</div>
+      <div class="kpi-val" id="k-wc">—</div>
+      <div class="kpi-sub" id="k-wc-sub">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Caja acumulada día a día</div>
+    <div id="cash-chart"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px" id="cash-chart-note"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Detalle semanal (primeras 12 semanas)</div>
+    <table class="comp-table" style="margin-bottom:8px">
+      <thead><tr><th>Semana</th><th>Ventas (u)</th><th>Cobros ML</th><th>Pagos producto</th><th>Fijos + impuestos</th><th>Caja al cierre</th></tr></thead>
+      <tbody id="cash-week-body"></tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted)">Cobros = neto que acredita MP. Pagos producto = facturas del laboratorio que vencen esa semana (IVA incluido). Fijos + impuestos = contador, honorarios, IVA del mes anterior y comisión del vendedor si corresponde.</p>
+  </div>
+
+  <div class="warn-box blue">
+    <div class="warn-title">Cómo leer esta simulación</div>
+    <p id="cash-narrative">—</p>
+  </div>
+  <div class="warn-box amber">
+    <div class="warn-title">Supuestos y límites</div>
+    <p>El IVA del mes se paga el día ~20 del mes siguiente (si da saldo a favor, no sale plata). Honorarios y contador se pagan a fin de mes; la comisión del vendedor, contra factura, a los 10 días del cierre. No incluye anticipos de Ganancias (el primer ejercicio no tiene) ni imprevistos: devoluciones, reclamos ML, quiebres de stock. El plazo del laboratorio es la variable más sensible — si te lo acortan a contado, el capital de trabajo cambia de signo.</p>
+  </div>
+</div>
+
 <!-- ════ TAB 4: RETIRO ════ -->
 <div id="pane-ret" class="pane">
   <h2 class="section-h">¿Cómo sacás plata de la SRL cada mes?</h2>
@@ -552,7 +624,8 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 <script>
 // ─── Estado ───
 const st={units:20,days:30,price:58900,prodCost:23690,ivaRate:21,mlPct:15.83,mlComision:58900*0.1583,mlShip:7470,cuotasPct:8.4,iibbPct:5,
-contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:2,comAlcance:100,eqPct:15};
+contadorSRL:200000,honorarios:0,dedPer:11748804,vendMode:'com',comPct:2,comAlcance:100,eqPct:15,
+capIni:3000000,dEnt:3,dAcr:8,dPagoLab:30,dStock:15,ramp:0};
 
 // ─── Escalas (ARCA 2025 — actualizar periódicamente) ───
 // Art. 94 Personas Humanas — recibe base imponible ANUAL
@@ -654,6 +727,53 @@ function calc(){
   const baseAlc=rev*st.comAlcance/100;
   const comEq=baseAlc>0?terceroB/baseAlc*100:0;
   return {u,U,rev,gross,opBase,com,isCom,eq,main,per,ret,capSocio,capVend,divShare,socioTotal,A,noCom,ahorro,socioA,retB,terceroB,socioB,baseAlc,comEq};
+}
+
+// ─── Flujo de caja diario (180 días) ───
+// Cobro: ML acredita el NETO (precio − comisión − envío − cuotas − retención IIBB)
+// a los dEnt+dAcr días de la venta. Pago: laboratorio a dPagoLab días, IVA incluido.
+// IVA neto del mes se paga el día 20 del mes siguiente. Fijos a fin de mes.
+function cashSim(){
+  const u=unitEcon(st.price,st.prodCost,st.mlComision);
+  const D=180, lag=st.dEnt+st.dAcr;
+  const costB=st.prodCost*(1+st.ivaRate/100);          // lo que sale de caja por unidad comprada
+  const netCred=st.price-u.mlBlock-u.iibb;             // lo que acredita MP por unidad
+  const isCom=st.vendMode==='com';
+  const sales=new Array(D).fill(0), inMl=new Array(D).fill(0), outProd=new Array(D).fill(0), outFix=new Array(D).fill(0);
+  for(let d=0;d<D;d++) sales[d]=(st.ramp>0&&d<st.ramp)?st.units*(d+1)/st.ramp:st.units;
+  // cobros ML
+  for(let d=0;d<D;d++){const cd=d+lag;if(cd<D)inMl[cd]+=sales[d]*netCred}
+  // compra inicial de stock (día 0, pagada a plazo) + reposición diaria de lo vendido
+  const stock0=st.dStock*st.units;
+  if(st.dPagoLab<D)outProd[st.dPagoLab]+=stock0*costB;else outProd[D-1]+=stock0*costB;
+  for(let d=0;d<D;d++){const pd=d+st.dPagoLab;if(pd<D)outProd[pd]+=sales[d]*costB}
+  // mensuales
+  for(let mEnd=30;mEnd<=D+30;mEnd+=30){
+    let su=0;for(let d=mEnd-30;d<Math.min(mEnd,D);d++)su+=sales[d];
+    if(mEnd-1<D)outFix[mEnd-1]+=st.contadorSRL+st.honorarios*2;
+    const ivaD=mEnd+20, iva=su*u.ivaNet;
+    if(ivaD<D&&iva>0)outFix[ivaD]+=iva;
+    if(isCom){const cd=mEnd+10;if(cd<D)outFix[cd]+=su*st.price*(st.comAlcance/100)*(st.comPct/100)}
+  }
+  // serie acumulada
+  let c=st.capIni,min=c,minD=0;const serie=[c];
+  for(let d=0;d<D;d++){c+=inMl[d]-outProd[d]-outFix[d];serie.push(c);if(c<min){min=c;minD=d+1}}
+  // capital de trabajo en régimen y ciclo
+  const cxc=lag*st.units*netCred, inv=st.dStock*st.units*costB, cxp=st.dPagoLab*st.units*costB;
+  return {serie,min,minD,fin:c,cxc,inv,cxp,wc:cxc+inv-cxp,ccc:st.dStock+lag-st.dPagoLab,lag,netCred,costB,D,sales,inMl,outProd,outFix};
+}
+function cashChart(cs){
+  const w=920,h=240,pl=14,pr=14,pt=12,pb=26;
+  const mx=Math.max(...cs.serie),mn=Math.min(...cs.serie,0),rng=(mx-mn)||1;
+  const X=i=>pl+(w-pl-pr)*i/cs.D, Y=v=>pt+(h-pt-pb)*(1-(v-mn)/rng);
+  let pts='';cs.serie.forEach((v,i)=>{pts+=X(i).toFixed(1)+','+Y(v).toFixed(1)+' '});
+  const z=Y(0);
+  let g='';
+  for(let d=0;d<=cs.D;d+=30)g+='<line x1="'+X(d)+'" y1="'+pt+'" x2="'+X(d)+'" y2="'+(h-pb)+'" stroke="#E0DED8" stroke-width="1"/><text x="'+X(d)+'" y="'+(h-8)+'" font-size="10" fill="#636366" text-anchor="middle">d'+d+'</text>';
+  const minPt='<circle cx="'+X(cs.minD)+'" cy="'+Y(cs.min)+'" r="4" fill="'+(cs.min<0?'#C93535':'#B86800')+'"/>';
+  return '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;display:block">'+g+
+    '<line x1="'+pl+'" y1="'+z+'" x2="'+(w-pr)+'" y2="'+z+'" stroke="#C93535" stroke-dasharray="4 3" stroke-width="1"/>'+
+    '<polyline fill="none" stroke="#1A5FAD" stroke-width="2.5" points="'+pts+'"/>'+minPt+'</svg>';
 }
 
 // ─── Helpers UI ───
@@ -799,6 +919,34 @@ function upd(){
       const mNeg=ue.net<0?' class="neg"':'';
       h+='<tr'+cls+'><td>'+(d>0?'+':'')+(d*100).toFixed(0)+'%</td><td>'+f(pc)+'</td><td'+mNeg+'>'+f(ue.net)+'</td><td'+mNeg+'>'+(st.price>0?pf(ue.net/st.price):'—')+'</td><td'+(pp.pre<0?' class="neg"':'')+'>'+f(pp.pre)+'</td><td>'+f(socio)+'</td></tr>';
     });tbC.innerHTML=h}
+
+  // ── Tab Caja: flujo de caja ──
+  const cs=cashSim();
+  T('v-lagtot',cs.lag);
+  T('k-ccc',cs.ccc+' días');
+  T('k-ccc-sub',cs.ccc<0
+    ?'Stock '+st.dStock+' + cobro '+cs.lag+' − pago lab '+st.dPagoLab+'. Negativo: cobrás '+Math.abs(cs.ccc)+' días ANTES de pagar — el laboratorio financia la operación.'
+    :'Stock '+st.dStock+' + cobro '+cs.lag+' − pago lab '+st.dPagoLab+'. Positivo: tenés que financiar '+cs.ccc+' días de operación con caja propia.');
+  T('k-min',f(cs.min));
+  T('k-min-sub',cs.min<0
+    ?'⚠ Día '+cs.minD+'. La caja se va a rojo: falta capital inicial por al menos '+f(-cs.min)+' (o renegociar plazos).'
+    :'Día '+cs.minD+'. La caja nunca baja de cero con el aporte inicial de '+f(st.capIni)+'.');
+  T('k-wc',f(cs.wc));
+  T('k-wc-sub','CxC ML '+f(cs.cxc)+' + stock '+f(cs.inv)+' − deuda laboratorio '+f(cs.cxp)+(cs.wc<0?'. Negativo: la operación libera caja al crecer.':'. Es la plata inmovilizada para sostener el régimen.'));
+  H('cash-chart',cashChart(cs));
+  T('cash-chart-note','Azul: caja acumulada (arranca en el capital inicial de '+f(st.capIni)+'). Línea roja punteada: cero. Punto marcado: caja mínima ('+f(cs.min)+', día '+cs.minD+'). Caja al día 180: '+f(cs.fin)+'.');
+  const tbW=el('cash-week-body');if(tbW){let h2='';
+    for(let wk=0;wk<12;wk++){
+      let su=0,ci=0,cp=0,cf=0;
+      for(let d=wk*7;d<Math.min((wk+1)*7,cs.D);d++){su+=cs.sales[d];ci+=cs.inMl[d];cp+=cs.outProd[d];cf+=cs.outFix[d]}
+      const cierre=cs.serie[Math.min((wk+1)*7,cs.D)];
+      h2+='<tr><td>S'+(wk+1)+'</td><td>'+Math.round(su)+'</td><td class="pos">'+f(ci)+'</td><td'+(cp>0?' class="neg"':'')+'>'+f(-cp)+'</td><td'+(cf>0?' class="neg"':'')+'>'+f(-cf)+'</td><td'+(cierre<0?' class="neg"':'')+'>'+f(cierre)+'</td></tr>';
+    }tbW.innerHTML=h2}
+  let nar='Cada venta te acredita '+f(cs.netCred)+' netos en MP a los '+cs.lag+' días; cada unidad comprada te cuesta '+f(cs.costB)+' (IVA incluido) pagaderos a '+st.dPagoLab+' días. ';
+  if(cs.ccc<0)nar+='Con estos plazos la plata de las ventas llega antes que el vencimiento del laboratorio: el negocio se autofinancia y crecer en volumen GENERA caja en vez de consumirla. El riesgo está en lo inverso — si el laboratorio te pasa a contado o ML estira la acreditación, el ciclo se da vuelta. ';
+  else nar+='Con estos plazos tenés que poner plata propia para sostener la operación: cada peso de crecimiento consume caja. Negociar más plazo con el laboratorio es la palanca más directa. ';
+  nar+='El primer vencimiento grande es el stock inicial ('+Math.round(st.dStock*st.units)+' u = '+f(st.dStock*st.units*cs.costB)+') el día '+st.dPagoLab+' — para entonces ya cobraste '+Math.max(0,st.dPagoLab-cs.lag)+' días de ventas.';
+  T('cash-narrative',nar);
 }
 
 function sv(k,v,vid,cur){st[k]=Number(v);const e=el(vid);if(e)e.textContent=cur?f(Number(v)):v;upd()}
