@@ -13,18 +13,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .header-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px}
 .header h1{font-size:24px;font-weight:700;margin-bottom:5px;line-height:1.2}
 .header-sub{font-size:13px;color:rgba(255,255,255,.55)}
-.header-actions{position:absolute;top:0;right:0}
+.header-actions{position:absolute;top:50%;right:0;transform:translateY(-50%);display:flex;align-items:center;gap:20px}
+.header-kpi{text-align:right;border-right:1px solid rgba(255,255,255,.15);padding-right:20px}
+.header-kpi-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);margin-bottom:2px}
+.header-kpi-val{font-size:20px;font-weight:700;color:#fff;line-height:1}
+.header-kpi-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
 .btn-print{padding:7px 14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit}
 .btn-print:hover{background:rgba(255,255,255,.2)}
-
-.kpis{background:#fff;border-bottom:1px solid var(--border)}
-.kpis-inner{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-.kpi{padding:18px 20px;border-right:1px solid var(--border)}
-.kpi:last-child{border-right:none}
-.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
-.kpi-val{font-size:22px;font-weight:700;color:var(--dark);line-height:1}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
-.kpi.hl .kpi-val{color:var(--green)}
 
 .main{max-width:1040px;margin:0 auto;padding:28px max(24px,5%) 60px}
 .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto}
@@ -139,29 +134,34 @@ input[type=range]{width:100%;accent-color:var(--dark);margin:0}
 .footer{background:#1C1C1E;color:rgba(255,255,255,.4);text-align:center;padding:20px 24px;font-size:11px;line-height:1.7}
 .footer strong{color:rgba(255,255,255,.7)}
 #srl-extra{display:none}
-@media(max-width:500px){.kpis-inner{grid-template-columns:1fr 1fr}.header-actions{position:static;margin-top:12px}}
-@media print{.header-actions,.tabs{display:none}.pane{display:block!important}input[type=range]{display:none}}
+@media(max-width:500px){
+  .header-actions{position:static;transform:none;margin-top:16px;display:flex;justify-content:space-between;align-items:center;width:100%}
+  .header-kpi{text-align:left;border-right:none;padding-right:0}
+}
+@media print{
+  .btn-print,.tabs{display:none!important}
+  .pane{display:block!important}
+  input[type=range]{display:none}
+}
 </style>
 </head>
 <body>
 
 <header class="header">
   <div class="header-inner">
-    <div class="header-actions"><button class="btn-print" onclick="window.print()">&#128438; Imprimir / PDF</button></div>
+    <div class="header-actions">
+      <div class="header-kpi">
+        <div class="header-kpi-label">Facturación mensual</div>
+        <div class="header-kpi-val" id="h-rev">—</div>
+        <div class="header-kpi-sub" id="h-units">—</div>
+      </div>
+      <button class="btn-print" onclick="window.print()">&#128438; Imprimir / PDF</button>
+    </div>
     <div class="header-eyebrow">Análisis de Viabilidad · Confidencial</div>
     <h1>Venta de Suplementos en MercadoLibre Argentina</h1>
     <div class="header-sub">Comparación de 3 estructuras · Proyecciones mensuales · <span id="hoy"></span></div>
   </div>
 </header>
-
-<div class="kpis">
-  <div class="kpis-inner">
-    <div class="kpi"><div class="kpi-label">Facturación mensual</div><div class="kpi-val" id="h-rev">—</div><div class="kpi-sub" id="h-units">—</div></div>
-    <div class="kpi"><div class="kpi-label">Ganancia del negocio (RI)</div><div class="kpi-val" id="h-net">—</div><div class="kpi-sub">antes de Ganancias personal</div></div>
-    <div class="kpi hl"><div class="kpi-label">Por socio / mes (SRL)</div><div class="kpi-val" id="h-pocket">—</div><div class="kpi-sub">honorarios netos en mano</div></div>
-    <div class="kpi"><div class="kpi-label">Primer día real</div><div class="kpi-val">$2.5M</div><div class="kpi-sub">39 unidades · Ensure 800g</div></div>
-  </div>
-</div>
 
 <div class="main">
 
@@ -591,7 +591,6 @@ function upd(){
   syncNi('ni-price',st.price);syncNi('ni-prodcost',st.prodCost);
   syncNi('ni-mlcom',Math.round(st.mlComision));syncNi('ni-ship',st.mlShip);syncNi('ni-dedper',st.dedPer);
   T('h-rev',f(r.rev));T('h-units',r.U+' u · '+st.units+'/día × '+st.days);
-  T('h-net',f(r.riBusiness));T('h-pocket',f(r.srlSocioPocket));
   // Per-unit table
   T('u-title','Detalle por unidad — costo $'+Math.round(st.prodCost)+' · venta $'+Math.round(st.price));
   T('u-price',f(st.price));T('u-prod',f(-st.prodCost));
