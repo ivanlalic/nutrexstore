@@ -1007,7 +1007,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- ══════════ Documentos embebidos (acceso discreto) ══════════ -->
 <div class="site-foot">
   <span>Simulador SRL &middot; uso interno</span>
-  <span class="foot-links"><a href="#" class="foot-link" onclick="openDoc('comision');return false">c</a>&nbsp;&middot;&nbsp;<a href="#" class="foot-link" onclick="openDoc('socio');return false">s</a></span>
+  <span class="foot-links"><a href="#" class="foot-link" onclick="openDoc('comision');return false">C</a>&nbsp;&middot;&nbsp;<a href="#" class="foot-link" onclick="openDoc('socio');return false">S</a></span>
 </div>
 
 <div id="doc-overlay" class="doc-overlay" aria-hidden="true">
@@ -1021,8 +1021,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <style>
 .site-foot{max-width:1040px;margin:0 auto;padding:14px max(24px,5%) 22px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#B9B6AE}
 .foot-links{user-select:none}
-.foot-link{color:#C9C6BE;text-decoration:none;padding:4px 5px}
-.foot-link:hover{color:var(--muted)}
+.foot-link{color:var(--green);background:rgba(27,138,90,0.08);border:1px solid rgba(27,138,90,0.2);text-decoration:none;padding:5px 10px;font-size:13px;font-weight:700;border-radius:4px;transition:all 0.15s;display:inline-block;margin:0 2px}
+.foot-link:hover{color:#fff;background:var(--green);border-color:var(--green);box-shadow:0 2px 6px rgba(27,138,90,0.2)}
 .doc-overlay{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);flex-direction:column}
 .doc-overlay.open{display:flex}
 .doc-overlay-bar{background:var(--dark);color:#fff;padding:10px max(24px,5%);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
